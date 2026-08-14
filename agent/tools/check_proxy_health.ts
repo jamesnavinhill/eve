@@ -28,7 +28,7 @@ export default defineTool({
       });
       results.modelsEndpoint = { reachable: modelsResponse.ok, status: modelsResponse.status };
       if (modelsResponse.ok) {
-        const body = await modelsResponse.json() as {
+        const body = (await modelsResponse.json()) as {
           data?: Array<{ id: string; modality?: string }>;
         };
         const models = body.data ?? [];
@@ -49,7 +49,10 @@ export default defineTool({
         };
       }
     } catch (error) {
-      results.modelsEndpoint = { reachable: false, error: error instanceof Error ? error.message : "Unknown error" };
+      results.modelsEndpoint = {
+        reachable: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
 
     // Probe /health/liveliness (unified gateway health — front door requires auth)
@@ -59,7 +62,10 @@ export default defineTool({
       });
       results.liveliness = { reachable: healthResponse.ok, status: healthResponse.status };
     } catch (error) {
-      results.liveliness = { reachable: false, error: error instanceof Error ? error.message : "Unknown error" };
+      results.liveliness = {
+        reachable: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
 
     // Probe /health/readiness (checks all three upstream services)
@@ -68,7 +74,7 @@ export default defineTool({
         headers: { Authorization: `Bearer ${apiKey ?? ""}` },
       });
       if (readyResponse.ok) {
-        const body = await readyResponse.json() as {
+        const body = (await readyResponse.json()) as {
           status: string;
           checks?: Record<string, unknown>;
         };
@@ -77,7 +83,10 @@ export default defineTool({
         results.readiness = { status: "degraded", httpStatus: readyResponse.status };
       }
     } catch (error) {
-      results.readiness = { status: "unreachable", error: error instanceof Error ? error.message : "Unknown error" };
+      results.readiness = {
+        status: "unreachable",
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
 
     return results;

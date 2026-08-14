@@ -12,7 +12,7 @@ export default defineTool({
       .default("cf-img-flux-1-schnell")
       .describe(
         "Image model alias. Fast: cf-img-flux-1-schnell. " +
-        "Higher quality: cf-img-flux-2-dev, cf-img-flux-2-klein-4b."
+          "Higher quality: cf-img-flux-2-dev, cf-img-flux-2-klein-4b.",
       ),
     size: z
       .enum(["512x512", "768x768", "1024x1024"])
@@ -25,7 +25,8 @@ export default defineTool({
 
     if (!baseUrl || !apiKey) {
       return {
-        error: "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
+        error:
+          "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
       };
     }
 
@@ -43,7 +44,7 @@ export default defineTool({
       return { error: `Gateway returned ${response.status}`, detail: text };
     }
 
-    const body = await response.json() as {
+    const body = (await response.json()) as {
       data: Array<{ b64_json?: string; url?: string }>;
     };
 

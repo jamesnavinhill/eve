@@ -6,9 +6,7 @@ export default defineTool({
     "Transcribe speech to text from an audio file using the Agency Gateway (Cloudflare Workers AI / Whisper). " +
     "Accepts a base64-encoded audio clip and returns the transcribed text. Use for voice input processing.",
   inputSchema: z.object({
-    audioBase64: z
-      .string()
-      .describe("Base64-encoded audio data (mp3, wav, ogg, flac, m4a)."),
+    audioBase64: z.string().describe("Base64-encoded audio data (mp3, wav, ogg, flac, m4a)."),
     filename: z
       .string()
       .default("audio.mp3")
@@ -18,7 +16,7 @@ export default defineTool({
       .default("cf-stt-whisper-large-v3-turbo")
       .describe(
         "STT model alias. Fast: cf-stt-whisper-tiny-en. " +
-        "Best multilingual: cf-stt-whisper-large-v3-turbo."
+          "Best multilingual: cf-stt-whisper-large-v3-turbo.",
       ),
   }),
   async execute({ audioBase64, filename, model }) {
@@ -27,7 +25,8 @@ export default defineTool({
 
     if (!baseUrl || !apiKey) {
       return {
-        error: "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
+        error:
+          "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
       };
     }
 
@@ -68,7 +67,7 @@ export default defineTool({
       return { error: `Gateway returned ${response.status}`, detail: errorText };
     }
 
-    const result = await response.json() as { text?: string };
+    const result = (await response.json()) as { text?: string };
 
     return {
       model,

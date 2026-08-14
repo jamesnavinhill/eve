@@ -25,6 +25,7 @@ pnpm run typecheck
 ### When pnpm blocks on build scripts
 
 If `pnpm run dev` fails with `ERR_PNPM_IGNORED_BUILDS`, either:
+
 1. Run `pnpm approve-builds` and approve `@mongodb-js/zstd` + `node-liblzma`
 2. Or bypass: `node_modules\.bin\eve.CMD dev`
 
@@ -51,16 +52,17 @@ curl -s https://gateway.jami.studio/v1/chat/completions \
 ### Through Eve
 
 Ask Eve in the dev TUI:
+
 - "Use the check_proxy_health tool and tell me what you see"
 - "Use the generate_image tool to create a blue circle"
 - "Use the text_to_speech tool to say hello"
 
 ## Build artifacts
 
-| Path | What |
-|------|------|
-| `.eve/` | Compiled manifests, discovery, logs, workflow data |
-| `.output/` | Nitro server output (from `eve build`) |
+| Path       | What                                               |
+| ---------- | -------------------------------------------------- |
+| `.eve/`    | Compiled manifests, discovery, logs, workflow data |
+| `.output/` | Nitro server output (from `eve build`)             |
 
 Both are gitignored. Delete `.eve/` to force a full recompile.
 
@@ -83,9 +85,9 @@ This repo (`eve/`) is our agent project — it consumes the `eve` npm package, n
 
 **Not yet decided.** Options:
 
-| Target | Pros | Cons |
-|--------|------|------|
-| Vercel | Managed Workflow + Sandbox + Cron, OIDC auth built in | Need to add gateway key as Vercel env var |
-| Self-host (DO droplet) | Same machine as the gateway, full control | Need to manage process supervisor, TLS, etc. |
+| Target                 | Pros                                                  | Cons                                         |
+| ---------------------- | ----------------------------------------------------- | -------------------------------------------- |
+| Vercel                 | Managed Workflow + Sandbox + Cron, OIDC auth built in | Need to add gateway key as Vercel env var    |
+| Self-host (DO droplet) | Same machine as the gateway, full control             | Need to manage process supervisor, TLS, etc. |
 
 See `docs/roadmaps/ROADMAP.md` for the phased plan.

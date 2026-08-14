@@ -17,6 +17,7 @@ Done. See `docs/roadmaps/ROADMAP.md` — the feature map section covers all 10 e
 The goal: an always-on voice/avatar agent that can converse **uninterrupted** by the background agents executing tasks underneath it. The voice layer should never block or be blocked by task execution.
 
 **Key questions to resolve together (reviewing official ElevenLabs + EVE docs):**
+
 - What is the voice agent really doing? Reading from what? Connected to what?
 - How does it route to tools/subagents without blocking the conversation?
 - What's the best way to expose the voice agent to the tools/subagents?
@@ -24,6 +25,7 @@ The goal: an always-on voice/avatar agent that can converse **uninterrupted** by
 - How do we avoid vendor lock-in (multiple providers, multiple accounts)?
 
 **References:**
+
 - `C:\Users\james\orgs\oss\avatar-agent` — dormant but working chat+video agent with ElevenLabs agent + Anam avatar
 - `C:\Users\james\projects\gardens` — working ElevenLabs/Anam avatar with multiple account providers (key: multi-provider, multi-account)
 
@@ -38,6 +40,7 @@ Resolved. The fork lives at `../eve-source-code/` (sibling, VS Code workspace fo
 ## ✅ How the repo works for agents — do I need more than one?
 
 Resolved. See `docs/roadmaps/ROADMAP.md` "Answers to your questions" section:
+
 - One root agent is the entry point
 - Declared subagents (`agent/subagents/<name>/`) for specialists
 - Remote agents (`defineRemoteAgent`) for separately deployed agents

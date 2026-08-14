@@ -10,9 +10,7 @@ export default defineTool({
     model: z
       .string()
       .default("cf-tts-aura-2-en")
-      .describe(
-        "TTS model alias. English: cf-tts-aura-2-en. Spanish: cf-tts-aura-2-es."
-      ),
+      .describe("TTS model alias. English: cf-tts-aura-2-en. Spanish: cf-tts-aura-2-es."),
     voice: z
       .string()
       .default("alpha")
@@ -24,7 +22,8 @@ export default defineTool({
 
     if (!baseUrl || !apiKey) {
       return {
-        error: "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
+        error:
+          "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
       };
     }
 

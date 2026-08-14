@@ -4,12 +4,14 @@
 
 Copy `.env.example` → `.env` and fill in:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `AGENCY_GATEWAY_BASE_URL` | Yes | Gateway endpoint. Live: `https://gateway.jami.studio/v1` |
-| `AGENCY_GATEWAY_API_KEY` | Yes | Gateway master key (mirrors `AGENCY_DO_MASTER_KEY` from agency `.env`) |
-
-No other env vars are needed for the current setup. The gateway front door authenticates all requests with the same master key.
+| Variable                  | Required | Description                                                            |
+| ------------------------- | -------- | ---------------------------------------------------------------------- |
+| `AGENCY_GATEWAY_BASE_URL` | Yes      | Gateway endpoint. Live: `https://gateway.jami.studio/v1`               |
+| `AGENCY_GATEWAY_API_KEY`  | Yes      | Gateway master key (mirrors `AGENCY_DO_MASTER_KEY` from agency `.env`) |
+| `POSTHOG_PROJECT_TOKEN`   | Yes      | PostHog project token for OTel trace ingestion                         |
+| `POSTHOG_HOST`            | No       | PostHog host (defaults to `https://us.i.posthog.com`)                  |
+| `SENTRY_DSN`              | Yes      | Sentry DSN for error tracking and performance tracing                  |
+| `SENTRY_ENVIRONMENT`      | No       | Environment tag (defaults to `eve-local`)                              |
 
 ## Model configuration (`agent/agent.ts`)
 
@@ -35,13 +37,13 @@ export default defineAgent({
 
 Change the string in `gateway.chat("model-alias")`. Available aliases are defined in `agency/config/litellm/config.yaml`. Common choices:
 
-| Alias | Provider | Notes |
-|-------|----------|-------|
-| `glm-5-2` | Neon AI Gateway | Current default, 128K context |
-| `z-ai-glm-5.2` | NVIDIA NIM | Same model, different route |
-| `claude-sonnet-5` | Neon | Anthropic family (omit temperature) |
-| `gpt-5` | Neon | OpenAI family |
-| `gemini-3-5-flash` | Neon | Google family, fast + cheap |
+| Alias              | Provider        | Notes                               |
+| ------------------ | --------------- | ----------------------------------- |
+| `glm-5-2`          | Neon AI Gateway | Current default, 128K context       |
+| `z-ai-glm-5.2`     | NVIDIA NIM      | Same model, different route         |
+| `claude-sonnet-5`  | Neon            | Anthropic family (omit temperature) |
+| `gpt-5`            | Neon            | OpenAI family                       |
+| `gemini-3-5-flash` | Neon            | Google family, fast + cheap         |
 
 ### Why `.chat()` not bare `gateway()`
 
@@ -55,21 +57,22 @@ When using a provider-authored `LanguageModel` (not a gateway string id), eve ca
 
 Our gateway at `gateway.jami.studio` is a single front door that routes by path:
 
-| Path pattern | Routes to | Service |
-|---------------|-----------|---------|
-| `/v1/chat/completions` | `:8787` | LiteLLM (Neon + NVIDIA + CF models) |
-| `/v1/images/generations` | `:8788` | Cloudflare Workers AI (FLUX) |
-| `/v1/audio/speech` | `:8789` | Cloudflare Workers AI (Aura TTS) |
-| `/v1/audio/transcriptions` | `:8789` | Cloudflare Workers AI (Whisper STT) |
-| `/v1/models` | all three | Merged catalog (191 models, modality-tagged) |
-| `/health/liveliness` | front door | Gateway liveness (requires auth header) |
-| `/health/readiness` | all three | Full readiness check (requires auth header) |
+| Path pattern               | Routes to  | Service                                      |
+| -------------------------- | ---------- | -------------------------------------------- |
+| `/v1/chat/completions`     | `:8787`    | LiteLLM (Neon + NVIDIA + CF models)          |
+| `/v1/images/generations`   | `:8788`    | Cloudflare Workers AI (FLUX)                 |
+| `/v1/audio/speech`         | `:8789`    | Cloudflare Workers AI (Aura TTS)             |
+| `/v1/audio/transcriptions` | `:8789`    | Cloudflare Workers AI (Whisper STT)          |
+| `/v1/models`               | all three  | Merged catalog (191 models, modality-tagged) |
+| `/health/liveliness`       | front door | Gateway liveness (requires auth header)      |
+| `/health/readiness`        | all three  | Full readiness check (requires auth header)  |
 
 Source: `agency/scripts/agency_api_gateway.py`
 
 ## Channel auth (`agent/channels/eve.ts`)
 
 The auth walk is `[vercelOidc(), localDev()]`:
+
 - `vercelOidc()` — accepts Vercel-issued OIDC tokens (for Vercel-to-Vercel calls)
 - `localDev()` — accepts everything in development (synthetic local principal)
 
@@ -79,7 +82,7 @@ In production (non-Vercel), replace with your own authenticator. See [eve auth d
 
 ```yaml
 allowBuilds:
-  '@mongodb-js/zstd': set this to true or false
+  "@mongodb-js/zstd": set this to true or false
   node-liblzma: set this to true or false
 ```
 

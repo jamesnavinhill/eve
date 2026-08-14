@@ -1,5 +1,6 @@
 allowBuilds:
-  '@mongodb-js/zstd': set this to true or false
-  node-liblzma: set this to true or false
+  "@mongodb-js/zstd": true
+  node-liblzma: true
 minimumReleaseAgeExclude:
   - eve@0.37.0
+onlyBuiltDependencies: "@mongodb-js/zstd node-liblzma"

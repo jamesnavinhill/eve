@@ -51,6 +51,7 @@ concern, and let downstream flow from it.
 
 `docs:check` failed in Multica workdirs because it required `docs/_standards/dev-docs-standard.md`,
 reachable only through a relative symlink to the `_ops` repo. Symptom appeared in two repos.
+
 - Patch (wrong): tolerate the missing symlink / skip the entry when absent.
 - Source (right): a downstream gate was requiring an upstream-owned file's physical presence. Removed
   that requirement from both gates so each validates only its own docs. The symlink stays as a dev
