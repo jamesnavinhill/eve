@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../agency"
+		},
+		{
+			"path": "../eve-source-code"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,26 @@
+{
+  "name": "eve-internal-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "eve dev",
+    "build": "eve build",
+    "start": "eve start",
+    "info": "eve info",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.36",
+    "ai": "^7.0.58",
+    "eve": "^0.37.0",
+    "zod": "^4.4.3"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.21.0",
+  "devDependencies": {
+    "just-bash": "^3.2.0"
+  }
+}

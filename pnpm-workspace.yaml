@@ -1,0 +1,5 @@
+allowBuilds:
+  '@mongodb-js/zstd': set this to true or false
+  node-liblzma: set this to true or false
+minimumReleaseAgeExclude:
+  - eve@0.37.0

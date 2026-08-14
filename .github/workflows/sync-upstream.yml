@@ -1,0 +1,88 @@
+name: Sync upstream eve
+
+# Pulls the latest changes from vercel/eve main into our fork's source-code/ subtree.
+# Runs daily and can be triggered manually. Opens a PR so you can review before merging.
+#
+# This syncs the forked eve source code that lives under source-code/.
+# Our own agent project (agent/, package.json, etc.) is never touched by this workflow.
+
+on:
+  schedule:
+    # 09:00 UTC daily
+    - cron: "0 9 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/vercel/eve.git || true
+          git fetch upstream main
+
+      - name: Create sync branch
+        run: |
+          BRANCH="sync/upstream-$(date -u +%Y-%m-%d)"
+          echo "SYNC_BRANCH=$BRANCH" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH"
+
+      - name: Sync source-code/ from upstream
+        run: |
+          # Copy upstream main into source-code/ using subtree merge strategy.
+          # This replaces source-code/ contents with the latest upstream tree.
+          git rm -r --ignore-unmatch source-code/
+          git checkout upstream/main -- .
+          # Move everything into source-code/ temporarily
+          mkdir -p /tmp/upstream-staging
+          # Move all checked-out files (except .git, source-code, and our own files) to staging
+          for item in $(ls -A | grep -v -E '^(\.git|source-code|\.github|agent|node_modules|\.eve|\.output|\.agent|desktop\.ini|vision-draft\.md|package\.json|pnpm-lock\.yaml|tsconfig\.json|\.gitignore|\.env.*)$'); do
+            mv "$item" /tmp/upstream-staging/
+          done
+          # Clear source-code and replace with staged upstream content
+          rm -rf source-code
+          mkdir -p source-code
+          cp -r /tmp/upstream-staging/. source-code/
+          git add -A source-code/
+
+      - name: Commit and push
+        run: |
+          git commit -m "sync: upstream vercel/eve@$(git rev-parse --short upstream/main)" || {
+            echo "No changes to sync"
+            exit 0
+          }
+          git push origin "$SYNC_BRANCH"
+
+      - name: Open pull request
+        if: success()
+        uses: actions/create-pull-request@v7
+        with:
+          branch: ${{ env.SYNC_BRANCH }}
+          title: "sync: upstream eve $(date -u +%Y-%m-%d)"
+          body: |
+            ## Upstream sync
+
+            This PR pulls the latest changes from `vercel/eve` main into `source-code/`.
+
+            **Upstream commit:** ${{ github.sha }}
+
+            Review the diff under `source-code/` before merging. Our agent project
+            (`agent/`, `package.json`, `tsconfig.json`) is not affected.
+          labels: |
+            sync
+            automated

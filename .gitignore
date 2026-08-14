@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# eve build artifacts
+.eve/
+.output/
+.vercel/
+
+# Environment files (secrets — never commit)
+.env
+.env*.local
+
+# TypeScript build info
+*.tsbuildinfo
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Forked source (synced by GH Action into source-code/ subtree in CI)
+# Local reference lives at ../eve-source-code/ (sibling, workspace folder)
+source-code/
