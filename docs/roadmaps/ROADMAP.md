@@ -1,7 +1,7 @@
 # Eve — Studio Internal Agent Roadmap
 
 > Status: **Phase 0 — Foundation scaffolded** (2026-08-13)
-> Source: Forked from `vercel/eve` v0.37.0, kept in sync via the `eve-source-code` sibling repo (GitHub fork of `vercel/eve`)
+> Repo: `jamesnavinhill/eve-agent` (this project) | Fork: `jamesnavinhill/eve` (sibling, fork of `vercel/eve`) | Source: `vercel/eve` v0.37.0
 
 ---
 
