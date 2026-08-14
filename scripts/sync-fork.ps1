@@ -14,7 +14,8 @@ $behind = [int](git rev-list --count HEAD..origin/main 2>$null)
 
 if ($behind -eq 0) {
     Write-Host "Already up to date." -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "$behind new commit(s) from upstream." -ForegroundColor Yellow
     git reset --hard origin/main
     Write-Host "Updated to $(git log --oneline -1)." -ForegroundColor Green
