@@ -1,7 +1,7 @@
 # Eve — Studio Internal Agent Roadmap
 
 > Status: **Phase 0 — Foundation scaffolded** (2026-08-13)
-> Source: Forked from `vercel/eve` v0.37.0, kept in sync via `.github/workflows/sync-upstream.yml`
+> Source: Forked from `vercel/eve` v0.37.0, kept in sync via the `eve-source-code` sibling repo (GitHub fork of `vercel/eve`)
 
 ---
 
@@ -15,8 +15,6 @@ eve/                          ← your agent project (this repo)
 ├── tsconfig.json
 ├── .env.example              ← model credentials template
 ├── .gitignore                ← ignores node_modules/, .env, build artifacts
-├── .github/workflows/
-│   └── sync-upstream.yml     ← daily sync from vercel/eve → source-code/ (in-repo)
 ├── agent/
 │   ├── agent.ts              ← model config (glm-5-2 via Agency Gateway)
 │   ├── instructions.md       ← Eve identity + standing rules
@@ -157,11 +155,11 @@ Tools run in the **app runtime** with full access to `process.env`. The sandbox 
 **Vision:** Voice/avatar top-layer (ElevenLabs + Anam) could be a channel or remote agent that delegates background work to specialist subagents.
 
 ### 6. Skills (on-demand procedures)
-**Status:** Skills from the fork are in `.agent/skills/` and `source-code/skills/`.
+**Status:** Skills from the fork are symlinked from `../eve-source-code/` into `.agents/skills/` (eve, gh-pr-description, technical-writing). untard and upstream are curated personal skills kept as real dirs.
 
 **How it works:** Skills are markdown (`SKILL.md`) that the model loads via `load_skill` when a turn calls for them. Progressive disclosure — keeps context lean.
 
-**Decision:** We have the source-code fork. When eve is installed (npm), its bundled `node_modules/eve/docs/` is the authoritative reference. We don't need to symlink skills — the eve package ships the `eve` skill that points to bundled docs.
+**Decision:** Skills are symlinked from the `eve-source-code` sibling repo into `.agents/skills/` so they stay aligned with the fork. The `eve` npm package also ships bundled docs at `node_modules/eve/docs/` as the authoritative version reference.
 
 ### 7. Schedules (cron jobs)
 **Status:** None yet.
@@ -207,15 +205,11 @@ Tools run in the **app runtime** with full access to `process.env`. The sandbox 
 
 ### "Should source-code/ move outside eve?"
 
-**Resolved:** Moved to sibling `c:\Users\james\projects\eve-source-code` and added as a VS Code workspace folder. The `.gitignore` no longer needs the `source-code/` entry for local purposes, but the GitHub Action still syncs `source-code/` as a subtree inside the git repo for CI reference. The sibling checkout is the local working reference.
+**Resolved:** Moved to sibling `c:\Users\james\projects\eve-source-code` (GitHub: `jamesnavinhill/eve`, a fork of `vercel/eve`). Added as a VS Code workspace folder. Sync via `git fetch upstream main && git merge upstream/main` or GitHub's "Sync fork" button. No in-repo sync workflow.
 
 ### "Should we symlink or npx-install skills?"
 
-**Neither permanently.** The `eve` npm package ships:
-- Bundled docs at `node_modules/eve/docs/` (authoritative, matches installed version)
-- The `eve` skill at `source-code/skills/eve/SKILL.md` that points to bundled docs
-
-The `.agent/skills/` copies you made are fine for reference. When eve is installed via npm, its bundled skill is what the agent uses. No symlinking needed.
+**Resolved:** Skills are symlinked from the `eve-source-code` sibling repo into `.agents/skills/`. This keeps them aligned with the fork automatically. The `eve` npm package also ships bundled docs at `node_modules/eve/docs/` as the authoritative version reference.
 
 ---
 
@@ -226,7 +220,7 @@ The `.agent/skills/` copies you made are fine for reference. When eve is install
 - [x] Model config — Agency Gateway (LiteLLM, OpenAI Chat Completions)
 - [x] Eve HTTP channel with auth walk
 - [x] Starter tools (whoami, gateway health check)
-- [x] GitHub Action for fork sync
+- [x] Skills symlinked from eve-source-code into `.agents/skills/`
 - [x] Model credential in `.env` (gateway master key)
 - [x] `pnpm run dev` live chat verified ("Hello, how can I help you today?")
 

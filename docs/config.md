@@ -89,5 +89,5 @@ These are transitive native deps from eve's sandbox backend. They don't affect a
 
 - `target: ES2024`, `module: esnext`, `strict: true`
 - Includes `agent/**/*` and `evals/**/*`
-- Excludes `node_modules`, `dist`, `source-code`
+- Excludes `node_modules`, `dist`
 - `types: ["node"]` — Node globals (`process`, `fetch`, `Buffer`)

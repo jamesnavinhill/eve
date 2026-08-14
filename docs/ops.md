@@ -66,12 +66,18 @@ Both are gitignored. Delete `.eve/` to force a full recompile.
 
 ## Upstream sync
 
-The GitHub Action `.github/workflows/sync-upstream.yml` runs daily at 09:00 UTC:
-- Fetches `vercel/eve` main
-- Copies upstream into `source-code/` subtree in the repo
-- Opens a PR for review
+The fork of `vercel/eve` lives in a sibling repo at `../eve-source-code/` (GitHub: `jamesnavinhill/eve`, a fork of `vercel/eve`). Sync it directly:
 
-The local `source-code/` directory was moved to a sibling (`../eve-source-code/`) and added as a VS Code workspace folder. The workflow still syncs `source-code/` inside the git repo for CI reference; locally we use the sibling checkout directly.
+```sh
+cd ../eve-source-code
+git fetch upstream main
+git merge upstream/main      # or: git rebase upstream/main
+git push origin main
+```
+
+Or use GitHub's "Sync fork" button on the fork page.
+
+This repo (`eve/`) is our agent project — it consumes the `eve` npm package, not the source tree. No in-repo sync workflow needed.
 
 ## Deployment
 

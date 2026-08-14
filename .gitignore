@@ -16,7 +16,3 @@ node_modules/
 # OS files
 Thumbs.db
 desktop.ini
-
-# Forked source (synced by GH Action into source-code/ subtree in CI)
-# Local reference lives at ../eve-source-code/ (sibling, workspace folder)
-source-code/

@@ -33,7 +33,7 @@ Principle established. The gateway tools use standard OpenAI-compatible endpoint
 
 ## ✅ Source code for eve: forked, synced, referenced
 
-Resolved. The fork lives at `../eve-source-code/` (sibling, VS Code workspace folder). The GitHub Action syncs `vercel/eve` daily into the in-repo `source-code/` subtree. Bundled eve docs at `node_modules/eve/docs/` are the authoritative version reference.
+Resolved. The fork lives at `../eve-source-code/` (sibling, VS Code workspace folder, GitHub: `jamesnavinhill/eve` fork of `vercel/eve`). Sync via `git fetch upstream main && git merge upstream/main` or GitHub's "Sync fork" button. No in-repo sync workflow. Bundled eve docs at `node_modules/eve/docs/` are the authoritative version reference.
 
 ## ✅ How the repo works for agents — do I need more than one?
 
