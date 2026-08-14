@@ -9,6 +9,11 @@ import { createOpenAI } from "@ai-sdk/openai";
 
 export const GATEWAY_BASE_URL =
   process.env.AGENCY_GATEWAY_BASE_URL ?? "https://gateway.jami.studio/v1";
+
+// The gateway host without the /v1 suffix. Health endpoints live at the
+// front door root (/health/liveliness, /health/readiness), not under /v1.
+export const GATEWAY_ORIGIN = GATEWAY_BASE_URL.replace(/\/v1\/?$/, "");
+
 export const GATEWAY_API_KEY = process.env.AGENCY_GATEWAY_API_KEY ?? "";
 
 /** Whether the gateway is configured with a non-empty key. */

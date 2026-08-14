@@ -1,6 +1,11 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { GATEWAY_BASE_URL, GATEWAY_API_KEY, isGatewayConfigured } from "../lib/gateway";
+import {
+  GATEWAY_BASE_URL,
+  GATEWAY_ORIGIN,
+  GATEWAY_API_KEY,
+  isGatewayConfigured,
+} from "../lib/gateway";
 
 export default defineTool({
   description:
@@ -54,9 +59,9 @@ export default defineTool({
       };
     }
 
-    // Probe /health/liveliness (unified gateway health — front door requires auth)
+    // Probe /health/liveliness (at the front door root, not under /v1)
     try {
-      const healthResponse = await fetch(`${GATEWAY_BASE_URL}/health/liveliness`, {
+      const healthResponse = await fetch(`${GATEWAY_ORIGIN}/health/liveliness`, {
         headers: authHeaders,
       });
       results.liveliness = { reachable: healthResponse.ok, status: healthResponse.status };
@@ -69,7 +74,7 @@ export default defineTool({
 
     // Probe /health/readiness (checks all three upstream services)
     try {
-      const readyResponse = await fetch(`${GATEWAY_BASE_URL}/health/readiness`, {
+      const readyResponse = await fetch(`${GATEWAY_ORIGIN}/health/readiness`, {
         headers: authHeaders,
       });
       if (readyResponse.ok) {
