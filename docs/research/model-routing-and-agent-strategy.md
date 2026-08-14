@@ -44,21 +44,25 @@ DO gateway needs a restart/redeploy from the latest config before the DO-Agency 
 
 ## Eve implementation — done in this session
 
-Implemented the hybrid Eve orchestrator model router:
+Moved the deterministic CF fallback from Eve into the Agency Gateway. Eve now uses a single static alias and pays no per-step resolver cost.
 
-- `agent/lib/models.ts` — canonical ordered CF preference list (YRKA > JAMI, Kimi K2.7-code > GLM 5.2 > Kimi K2.6 > Gemma 4), with runtime `/v1/models` availability check (cached, non-blocking), vision skip for GLM 5.2, and graceful fallback to the hardcoded top preference.
-- `agent/agent.ts` — replaced `gateway.chat("glm-5-2")` and hardcoded `modelContextWindowTokens: 128_000` with `defineDynamic({ step.started: selectEveModel })`.
+- `agency/config/litellm/config.yaml` — added `eve-orchestrator` meta alias. LiteLLM's `router_settings.fallbacks` tries CF models in order: YRKA > JAMI; Kimi K2.7-code > Kimi K2.6 > Gemma 4. GLM 5.2 is intentionally excluded so image turns never hit a text-only model.
+- `agency/scripts/sync_surfaces.py` — added `eve-orchestrator` to `MODEL_CAPS` so IDE/agent surfaces get the right context/output tokens and capability flags.
+- `agent/agent.ts` — replaced the `defineDynamic` `step.started` resolver and deleted `agent/lib/models.ts`. Now uses `gateway.chat("eve-orchestrator")` with `modelContextWindowTokens: 256_000`.
+- Surfaces re-synced against the deployed DO gateway so `eve-orchestrator` appears in VS Code / ZCode / OpenCode model inventories.
 
 Verification:
 
+- Agency config smoke test — local LiteLLM proxy served `eve-orchestrator` and a chat completion succeeded.
+- `scripts/digitalocean_deploy.ps1` — deployed to DO gateway; readiness probe reported 200 models ready.
+- `scripts/sync_surfaces.py --remote` — ran; `eve-orchestrator` added to VS Code and ZCode configs, `opencode.json` updated.
 - `pnpm typecheck` — PASS
 - `pnpm lint` — PASS
 - `pnpm fmt` — PASS
-- `npx eve info` — PASS, 0 errors/warnings
-- `pnpm dev` smoke test — created a session, message routed to `openai/cf-yrka-moonshotai-kimi-k2-7-code`, returned "OK".
+- `pnpm build` — PASS
+- `pnpm dev` smoke test — session accepted; stream shows `modelId: "openai/eve-orchestrator"`, response generated, `step.completed` with usage.
 
 ## Remaining open decisions
 
-1. **Group selection API for subagents.** Each declared subagent (`coding`, `audit`, `research`, `creative`, `bounded-task`) will call `selectModel(intent)` with a fixed intent string. Agree on naming?
-2. **Gateway-level fallback.** Once Eve routing is proven, move the ordered fallback into LiteLLM `router_settings.fallbacks` in agency so all surfaces benefit.
-3. **Next Eve slice:** scaffold the subagent filesystem and connect each subagent to its model group.
+1. **Group selection API for subagents.** Each declared subagent (`coding`, `audit`, `research`, `creative`, `bounded-task`) will need its own LiteLLM meta alias or a shared model-group resolver. Agree on naming and whether to keep the logic in agency or Eve?
+2. **Next Eve slice:** scaffold the subagent filesystem and connect each subagent to its model group.

@@ -48,12 +48,14 @@
 ## Verified
 
 ### Static checks
+
 - `pnpm typecheck` — PASS (0 errors)
 - `pnpm lint` — PASS (0 errors, 0 warnings)
 - `pnpm fmt` — PASS (agent files, no changes needed)
 - `npx eve info` — PASS (5 tools, 0 errors, 0 warnings)
 
 ### Live end-to-end smoke tests (pnpm dev + gateway.jami.studio)
+
 - **Eve channel (check_proxy_health)**: model called the tool through the
   shared provider, tool probed the gateway via shared config, returned 191
   models (131 chat / 33 image / 12 TTS / 15 STT), liveliness + readiness

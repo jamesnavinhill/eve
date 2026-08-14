@@ -110,7 +110,7 @@ The built-in `bash`/`read_file`/`write_file`/`glob`/`grep` tools always target t
 
 ## 7. Channels — how generation routing works
 
-"Going through the model" means: the model receives a text request from the user, decides to call `generate_image`, the tool executes, the result (base64 image) comes back to the model as a tool result, and then the model describes it in text. The image data is in the model's context, but the model can't actually *see* it — it just sees the base64 string.
+"Going through the model" means: the model receives a text request from the user, decides to call `generate_image`, the tool executes, the result (base64 image) comes back to the model as a tool result, and then the model describes it in text. The image data is in the model's context, but the model can't actually _see_ it — it just sees the base64 string.
 
 "Routing to a frontend" means: the tool result goes through a channel as a structured event that the frontend renders directly (e.g., an `<img>` tag in a chat UI). The model never holds the image data — it just knows the tool was called and the frontend handles the display. This is what `useEveAgent` (React) enables — rich content rendering on the client.
 
@@ -118,8 +118,8 @@ With ElevenLabs as the shell: the `client_tool_result` event carries structured 
 
 ## 8. GitHub — channel OR connection (both exist)
 
-- **GitHub channel** (`agent/channels/github.ts`): lets the agent be *triggered from* GitHub — `@mention` in PRs/issues, webhook-driven, checks out the PR ref into the sandbox, auto-replies as a comment
-- **GitHub connection** (`agent/connections/github.ts`): lets the agent *call* the GitHub API — create issues, read PRs, manage labels — as model-callable tools
+- **GitHub channel** (`agent/channels/github.ts`): lets the agent be _triggered from_ GitHub — `@mention` in PRs/issues, webhook-driven, checks out the PR ref into the sandbox, auto-replies as a comment
+- **GitHub connection** (`agent/connections/github.ts`): lets the agent _call_ the GitHub API — create issues, read PRs, manage labels — as model-callable tools
 
 You'd use both: channel to let the agent respond to PRs, connection to let it open issues or read repo data.
 
@@ -146,26 +146,26 @@ The proper fix:
 graph TD
     YOU[You — voice/video]
     EL[ElevLabs Agent<br/>STT + Turn-taking + TTS + Avatar<br/>Intent Router LLM]
-    
+
     YOU <-->|WebSocket| EL
-    
+
     EL -->|webhook tool: POST /eve/v1/session| EVE[Eve Agent<br/>HTTP API + auth]
     EL -->|contextual_update: progress/results| EL
-    
+
     EVE -->|defineDynamic: route by intent| SA1[Subagent: Researcher<br/>web_search + sandbox]
     EVE -->|defineDynamic: route by intent| SA2[Subagent: Coder<br/>bash + write_file + git]
     EVE -->|defineDynamic: route by intent| SA3[Subagent: Gateway Ops<br/>check_proxy_health + connections]
-    
+
     SA1 --> SSA1[Sub-subagent<br/>specialized tool]
     SA2 --> SSA2[Sub-subagent<br/>specialized tool]
-    
+
     EVE -->|results| EL
     EL -->|speaks summary| YOU
-    
+
     EVE -->|OpenAPI Connection| GW[Agency Gateway<br/>LiteLLM Proxy]
     GW -->|chat completions| MODELS[191+ model aliases]
     GW -->|images/audio| CF[Cloudflare Workers AI]
-    
+
     EVE -->|optional: GitHub Channel| GH[GitHub<br/>PR review, @mentions]
     EVE -->|optional: schedule| CRON[Cron jobs<br/>health checks, summaries]
 ```

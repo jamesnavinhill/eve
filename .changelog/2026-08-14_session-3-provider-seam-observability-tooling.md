@@ -3,6 +3,7 @@
 ## What Changed
 
 ### Agency provider seam documented in AGENTS.md
+
 - Added "Provider seam — Agency Gateway" section to `AGENTS.md` calling out the
   Agency Gateway (LiteLLM proxy at `gateway.jami.studio`) as the primary provider
   interface, with a pointer to the sibling `agency/` workspace folder
@@ -12,6 +13,7 @@
 - Updated key commands to include `pnpm lint` and `pnpm fmt`
 
 ### PostHog + Sentry wired into eve .env
+
 - Populated `POSTHOG_PROJECT_TOKEN` and `POSTHOG_HOST` in `.env` (shared from
   the agency project — same PostHog project)
 - Added `SENTRY_DSN` and `SENTRY_ENVIRONMENT` to `.env` (same Sentry org/project
@@ -20,12 +22,14 @@
 - Updated `docs/config.md` env vars table to include all observability vars
 
 ### Sentry added to agent/instrumentation.ts
+
 - `Sentry.init()` runs before OTel setup so the error handler captures everything
 - DSN from `SENTRY_DSN`, environment from `SENTRY_ENVIRONMENT` (defaults to
   `eve-local`), `tracesSampleRate` and `profilesSampleRate` at 1.0
 - `@sentry/node` installed as a runtime dependency
 
 ### Linting + formatting tooling set up
+
 - Installed `oxlint` and `oxfmt` as devDependencies (matching the eve framework's
   own tooling)
 - Added `lint` (`oxlint --fix`) and `fmt` (`oxfmt`) scripts to `package.json`
@@ -34,6 +38,7 @@
 - No custom rules, no constraints, no gates — just the tools, ready to use
 
 ### docs/config.md updated
+
 - Env vars table now includes PostHog and Sentry vars with descriptions
 
 ## Verified

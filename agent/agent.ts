@@ -1,24 +1,14 @@
-import { defineAgent, defineDynamic } from "eve";
-import { selectEveModel } from "./lib/models";
+import { defineAgent } from "eve";
+import { gateway } from "./lib/gateway";
 
 export default defineAgent({
-  // Dynamic model selection lets Eve choose the right Cloudflare Workers AI
-  // model per turn instead of hardcoding a single alias. The resolver:
-  //   - prefers YRKA over JAMI,
-  //   - prefers Kimi K2.7-code > GLM 5.2 > Kimi K2.6 > Gemma 4,
-  //   - skips GLM 5.2 when the turn contains image content,
-  //   - refreshes available aliases from the gateway /v1/models endpoint
-  //     with a graceful fallback to the hardcoded preference list.
-  model: defineDynamic({
-    events: {
-      // step.started is required here because we return a live LanguageModel
-      // from our custom OpenAI-compatible provider. Session/turn selections
-      // must be model id strings.
-      async "step.started"(_event, ctx) {
-        return selectEveModel({ messages: ctx.messages });
-      },
-    },
-  }),
+  // Eve routes through the Agency Gateway's eve-orchestrator alias. The
+  // gateway owns the ordered fallback list (YRKA > JAMI; Kimi K2.7-code >
+  // Kimi K2.6 > Gemma 4) so Eve does not pay a per-step resolver cost.
+  // GLM 5.2 is excluded from the orchestrator group so image turns never
+  // hit a text-only model.
+  model: gateway.chat("eve-orchestrator"),
+  modelContextWindowTokens: 256_000,
 
   // Reasoning effort for the model. All CF candidates support reasoning.
   reasoning: "high",

@@ -39,36 +39,36 @@ eve is designed as a filesystem-first agent framework where everything is a file
 
 ### Execution layer
 
-| Primitive | How it works | What it gives you |
-| --- | --- | --- |
-| **Tools** (`agent/tools/*.ts`) | `defineTool` with Zod schema, async `execute`, runs in app runtime with full `process.env` | The model can call typed actions — API calls, database queries, file operations, anything scriptable. You have 5; can add unlimited. Built-in tools (`bash`, `read_file`, `write_file`, `glob`, `grep`, `web_search`, `todo`, `ask_question`) can be enabled/disabled. |
-| **Sandbox** (`agent/sandbox/`) | Isolated bash at `/workspace`, backed by Docker/microsandbox/just-bash | The agent can execute code, run builds, read/write files, do data analysis — all in isolation. This is the biggest missing capability right now. |
-| **Connections** (`agent/connections/*.ts`) | `defineMcpClientConnection` or `defineOpenAPIConnection` — wires MCP/OpenAPI servers as tools the model calls | Zero-plumbing integration with Linear, GitHub, Sentry, PostHog, databases — the model gets `<connection>__<tool>` names. Auth is brokered per-caller, never shown to model. |
-| **Subagents** (`agent/subagents/<id>/`) | Full mini-agent directories with own model, tools, instructions, sandbox | Specialist delegation: a researcher with web tools, a code reviewer with bash, a data analyst with database connections — each with isolated context and result-only return. |
+| Primitive                                  | How it works                                                                                                  | What it gives you                                                                                                                                                                                                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tools** (`agent/tools/*.ts`)             | `defineTool` with Zod schema, async `execute`, runs in app runtime with full `process.env`                    | The model can call typed actions — API calls, database queries, file operations, anything scriptable. You have 5; can add unlimited. Built-in tools (`bash`, `read_file`, `write_file`, `glob`, `grep`, `web_search`, `todo`, `ask_question`) can be enabled/disabled. |
+| **Sandbox** (`agent/sandbox/`)             | Isolated bash at `/workspace`, backed by Docker/microsandbox/just-bash                                        | The agent can execute code, run builds, read/write files, do data analysis — all in isolation. This is the biggest missing capability right now.                                                                                                                       |
+| **Connections** (`agent/connections/*.ts`) | `defineMcpClientConnection` or `defineOpenAPIConnection` — wires MCP/OpenAPI servers as tools the model calls | Zero-plumbing integration with Linear, GitHub, Sentry, PostHog, databases — the model gets `<connection>__<tool>` names. Auth is brokered per-caller, never shown to model.                                                                                            |
+| **Subagents** (`agent/subagents/<id>/`)    | Full mini-agent directories with own model, tools, instructions, sandbox                                      | Specialist delegation: a researcher with web tools, a code reviewer with bash, a data analyst with database connections — each with isolated context and result-only return.                                                                                           |
 
 ### Lifecycle layer
 
-| Primitive | How it works | What it gives you |
-| --- | --- | --- |
-| **Schedules** (`agent/schedules/*.ts`) | `defineSchedule` on cron cadence | Autonomous recurring work: daily gateway health checks, weekly cost summaries, periodic syncs. Can send to any channel. |
-| **Hooks** (`agent/hooks/*.ts`) | `defineHook` subscribing to stream events | Observe-only side effects: audit every tool call to Postgres, alert on gateway failures, auto-cleanup after idle, persist transcripts. |
-| **Skills** (`agent/skills/*.md`) | SKILL.md convention — description always visible, body loads on demand | On-demand procedures (deployment runbooks, troubleshooting guides, code review checklists) that keep the system prompt lean. progressive disclosure. |
+| Primitive                              | How it works                                                           | What it gives you                                                                                                                                    |
+| -------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Schedules** (`agent/schedules/*.ts`) | `defineSchedule` on cron cadence                                       | Autonomous recurring work: daily gateway health checks, weekly cost summaries, periodic syncs. Can send to any channel.                              |
+| **Hooks** (`agent/hooks/*.ts`)         | `defineHook` subscribing to stream events                              | Observe-only side effects: audit every tool call to Postgres, alert on gateway failures, auto-cleanup after idle, persist transcripts.               |
+| **Skills** (`agent/skills/*.md`)       | SKILL.md convention — description always visible, body loads on demand | On-demand procedures (deployment runbooks, troubleshooting guides, code review checklists) that keep the system prompt lean. progressive disclosure. |
 
 ### Surface layer
 
-| Primitive | How it works | What it gives you |
-| --- | --- | --- |
-| **Channels** (`agent/channels/*.ts`) | Platform adapters — normalize input to messages, own delivery | Make the agent reachable from Slack, Discord, Telegram, GitHub PRs, Twilio SMS, Teams, Linear. Also `useEveAgent` React hook or `withEve` Next.js for a browser UI. |
-| **Instructions** (`instructions.md`) | System or user role, static or dynamic | Can be dynamic per-tenant, per-channel. Can compose from a directory. The identity + standing rules. |
-| **Dynamic capabilities** | `defineDynamic` — resolve model/tools/skills/instructions at runtime | Per-tenant tool sets, feature flags, dynamic model routing (images → vision model, text → GLM-5.2). |
+| Primitive                            | How it works                                                         | What it gives you                                                                                                                                                   |
+| ------------------------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Channels** (`agent/channels/*.ts`) | Platform adapters — normalize input to messages, own delivery        | Make the agent reachable from Slack, Discord, Telegram, GitHub PRs, Twilio SMS, Teams, Linear. Also `useEveAgent` React hook or `withEve` Next.js for a browser UI. |
+| **Instructions** (`instructions.md`) | System or user role, static or dynamic                               | Can be dynamic per-tenant, per-channel. Can compose from a directory. The identity + standing rules.                                                                |
+| **Dynamic capabilities**             | `defineDynamic` — resolve model/tools/skills/instructions at runtime | Per-tenant tool sets, feature flags, dynamic model routing (images → vision model, text → GLM-5.2).                                                                 |
 
 ### Quality + packaging layer
 
-| Primitive | How it works | What it gives you |
-| --- | --- | --- |
-| **Evals** (`evals/*.eval.ts`) | `defineEval` drives real HTTP sessions, grades with assertions or LLM-as-judge | Regression tests: "when asked about gateway health, it calls `check_proxy_health`". `mockModel` for deterministic runs. |
-| **Extensions** (`agent/extensions/*.ts`) | `defineExtension` — package tools/skills/hooks into npm packages | Reusable capability packs across multiple agent projects. |
-| **Instrumentation** (`instrumentation.ts`) | Already wired — PostHog + Sentry | Done. Can add `recordInputs`/`recordOutputs` later. |
+| Primitive                                  | How it works                                                                   | What it gives you                                                                                                       |
+| ------------------------------------------ | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| **Evals** (`evals/*.eval.ts`)              | `defineEval` drives real HTTP sessions, grades with assertions or LLM-as-judge | Regression tests: "when asked about gateway health, it calls `check_proxy_health`". `mockModel` for deterministic runs. |
+| **Extensions** (`agent/extensions/*.ts`)   | `defineExtension` — package tools/skills/hooks into npm packages               | Reusable capability packs across multiple agent projects.                                                               |
+| **Instrumentation** (`instrumentation.ts`) | Already wired — PostHog + Sentry                                               | Done. Can add `recordInputs`/`recordOutputs` later.                                                                     |
 
 ## The practical paths forward
 
@@ -167,9 +167,15 @@ The **auth walk** is an ordered list of authenticators. For each inbound HTTP re
 ```ts
 // Returns a valid SessionAuthContext ONLY when running as a dev server
 function localDev(): AuthFn {
-  return () => isLocalDevelopmentServer()
-    ? { principalId: "local-dev", principalType: "local-dev", authenticator: "local-dev", attributes: {} }
-    : null;
+  return () =>
+    isLocalDevelopmentServer()
+      ? {
+          principalId: "local-dev",
+          principalType: "local-dev",
+          authenticator: "local-dev",
+          attributes: {},
+        }
+      : null;
 }
 ```
 
@@ -190,13 +196,13 @@ Extracts a Bearer token from the `Authorization` header, verifies it's a Vercel 
 
 ### "Everything else gets a 401" — practical scenarios
 
-| Scenario | Local dev (`eve dev`) | Production (Vercel) | Production (self-hosted `eve start`) |
-| --- | --- | --- | --- |
-| `curl localhost:2000/eve/v1/session` (no auth) | ✅ Accepted by `localDev()` | 401 | 401 |
-| Browser fetch to the API (no auth) | ✅ Accepted | 401 | 401 |
-| Request with Vercel OIDC Bearer token | ✅ Accepted (either wins) | ✅ Accepted by `vercelOidc()` | 401 (no Vercel platform) |
-| Request with API key / custom auth | ✅ Accepted by `localDev()` | 401 | 401 |
-| Internal subagent/schedule dispatch | ✅ Accepted | ✅ Vercel OIDC token | N/A (internal) |
+| Scenario                                       | Local dev (`eve dev`)       | Production (Vercel)           | Production (self-hosted `eve start`) |
+| ---------------------------------------------- | --------------------------- | ----------------------------- | ------------------------------------ |
+| `curl localhost:2000/eve/v1/session` (no auth) | ✅ Accepted by `localDev()` | 401                           | 401                                  |
+| Browser fetch to the API (no auth)             | ✅ Accepted                 | 401                           | 401                                  |
+| Request with Vercel OIDC Bearer token          | ✅ Accepted (either wins)   | ✅ Accepted by `vercelOidc()` | 401 (no Vercel platform)             |
+| Request with API key / custom auth             | ✅ Accepted by `localDev()` | 401                           | 401                                  |
+| Internal subagent/schedule dispatch            | ✅ Accepted                 | ✅ Vercel OIDC token          | N/A (internal)                       |
 
 **The key insight for your project:** You're not deploying on Vercel. You're self-hosting. So `vercelOidc()` does nothing useful for you in production — there's no Vercel platform to mint OIDC tokens. And `localDev()` only works in dev.
 
@@ -224,7 +230,7 @@ This is worth thinking through carefully. The current setup puts `generate_image
 
 **Path A: Tools (current) — the model decides when to generate/synthesize**
 
-- Pro: The model can reason about *when* and *what* to generate. "Create a diagram of the architecture" → model calls `generate_image` with a crafted prompt
+- Pro: The model can reason about _when_ and _what_ to generate. "Create a diagram of the architecture" → model calls `generate_image` with a crafted prompt
 - Pro: The model can chain multimodal with text reasoning — analyze the transcription result, then respond
 - Con: The model has to know these tools exist and when to use them (eating system prompt / context)
 - Con: Tools return to the model, not directly to the user — the base64 image goes through the model context, which may not understand it
@@ -237,9 +243,9 @@ This is worth thinking through carefully. The current setup puts `generate_image
 **Path C: Dynamic model routing — different models for different modalities**
 
 - `defineDynamic` on `step.started` can route to a vision model when images are involved, a text model when not
-- This isn't about tools — it's about which *model* handles the turn
+- This isn't about tools — it's about which _model_ handles the turn
 
-The big-picture question: are these multimodal capabilities things the *model* should control, or things the *agent runtime* should control? For a gateway agent that's an API surface, tools make sense — the caller (another agent, a script, a frontend) sends a message and the model can use the gateway. For a user-facing agent, you might want the frontend to call these endpoints directly via connections, bypassing the model entirely.
+The big-picture question: are these multimodal capabilities things the _model_ should control, or things the _agent runtime_ should control? For a gateway agent that's an API surface, tools make sense — the caller (another agent, a script, a frontend) sends a message and the model can use the gateway. For a user-facing agent, you might want the frontend to call these endpoints directly via connections, bypassing the model entirely.
 
 ## 5. Sandbox — do you need Docker?
 
@@ -271,18 +277,18 @@ For local dev where you just want the model to be able to read/write files and r
 
 These serve **completely different consumers:**
 
-| | `.agents/skills/` | `agent/skills/` |
-| --- | --- | --- |
-| **Who reads them** | VS Code Copilot (your coding assistant) | The eve agent runtime (the LLM running your agent) |
+|                     | `.agents/skills/`                       | `agent/skills/`                                    |
+| ------------------- | --------------------------------------- | -------------------------------------------------- |
+| **Who reads them**  | VS Code Copilot (your coding assistant) | The eve agent runtime (the LLM running your agent) |
 | **Path convention** | `<name>/SKILL.md` with YAML frontmatter | `<name>.md` or `<name>/SKILL.md` — same convention |
-| **When loaded** | Injected into Copilot context on demand | Loaded by `load_skill` tool when the model asks |
-| **Current state** | 5 skills symlinked from the fork | Zero — none exist yet |
+| **When loaded**     | Injected into Copilot context on demand | Loaded by `load_skill` tool when the model asks    |
+| **Current state**   | 5 skills symlinked from the fork        | Zero — none exist yet                              |
 
 They use the **same SKILL.md convention** — eve's docs explicitly say a skill authored against the Agent Skills standard ports over as-is. But they're consumed by different systems.
 
 Your `.agents/skills/` is correct where it is — it's for VS Code Copilot. If you want the eve **agent** to have skills at runtime, you'd create `agent/skills/` and drop SKILL.md files there. You could symlink the same content to both if you want a skill available to both Copilot and the agent.
 
-**You don't need to move `.agents/skills/`.** You need to *add* `agent/skills/` if you want the agent itself to load procedures at runtime. They're two different directories for two different purposes.
+**You don't need to move `.agents/skills/`.** You need to _add_ `agent/skills/` if you want the agent itself to load procedures at runtime. They're two different directories for two different purposes.
 
 ## 7. Connections, subagents, schedules, hooks, evals — the discussion
 
