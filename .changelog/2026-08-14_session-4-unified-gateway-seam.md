@@ -38,12 +38,42 @@
   `check_proxy_health.ts` all import from `../lib/gateway` instead of
   reading `AGENCY_GATEWAY_BASE_URL` / `AGENCY_GATEWAY_API_KEY` independently.
 
+### Health probe path fix
+
+- `check_proxy_health.ts` was probing `/v1/health/liveliness` and
+  `/v1/health/readiness` — both 404 because the front door serves health
+  at the host root, not under `/v1`. Added `GATEWAY_ORIGIN` to the shared
+  module (the host without `/v1`) and used it for health endpoints.
+
 ## Verified
 
+### Static checks
 - `pnpm typecheck` — PASS (0 errors)
 - `pnpm lint` — PASS (0 errors, 0 warnings)
 - `pnpm fmt` — PASS (agent files, no changes needed)
 - `npx eve info` — PASS (5 tools, 0 errors, 0 warnings)
+
+### Live end-to-end smoke tests (pnpm dev + gateway.jami.studio)
+- **Eve channel (check_proxy_health)**: model called the tool through the
+  shared provider, tool probed the gateway via shared config, returned 191
+  models (131 chat / 33 image / 12 TTS / 15 STT), liveliness + readiness
+  both status 200. Model streamed a natural summary response.
+- **Eve channel (generate_image)**: model called the tool, tool returned
+  74 KB base64 image to the channel stream, model saw only the text
+  summary via `toModelOutput` ("Generated 512x512 image using
+  cf-img-flux-1-schnell") — confirmed the projection works.
+- **Gateway direct (Neon chat)**: `glm-5-2` returned "ROUTE OK" with
+  reasoning content. 154 tokens. Self-tagging metadata in request body.
+- **Gateway direct (NVIDIA via CF)**: `cf-nvidia-nemotron-3-120b-a12b`
+  returned "OK". 36 tokens. (NIM route `z-ai-glm-5.2` timed out at 90s —
+  endpoint slow/down, not a code issue.)
+- **Gateway direct (image gen)**: `cf-img-flux-1-schnell` produced 104 KB
+  base64 JPEG. ✓
+- **Gateway direct (TTS)**: `cf-tts-aura-2-en` produced 24 KB MP3. ✓
+- **Gateway direct (STT round-trip)**: TTS output fed back as STT input,
+  Whisper returned the transcription matching the original text. ✓
+- **Gateway direct (health)**: `/health/liveliness` = ok,
+  `/health/readiness` = ready. ✓ (at host root, not /v1)
 
 ## Decisions
 
