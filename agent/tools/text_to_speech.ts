@@ -1,5 +1,6 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
+import { GATEWAY_BASE_URL, gatewayAuthHeaders, isGatewayConfigured } from "../lib/gateway";
 
 export default defineTool({
   description:
@@ -17,22 +18,16 @@ export default defineTool({
       .describe("Voice variant. Options vary by model (alpha, beta, gamma, delta)."),
   }),
   async execute({ text, model, voice }) {
-    const baseUrl = process.env.AGENCY_GATEWAY_BASE_URL;
-    const apiKey = process.env.AGENCY_GATEWAY_API_KEY;
-
-    if (!baseUrl || !apiKey) {
+    if (!isGatewayConfigured()) {
       return {
         error:
           "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
       };
     }
 
-    const response = await fetch(`${baseUrl}/audio/speech`, {
+    const response = await fetch(`${GATEWAY_BASE_URL}/audio/speech`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: gatewayAuthHeaders(),
       body: JSON.stringify({
         model,
         input: text,
@@ -58,6 +53,18 @@ export default defineTool({
       format: "mp3",
       audioBase64: b64,
       sizeBytes: audioBuffer.byteLength,
+    };
+  },
+  // The model can't hear audio — the base64 is wasted context. Project it
+  // down to a text summary. The full output still flows to the channel
+  // stream and hooks for frontend rendering.
+  toModelOutput(output) {
+    if ("error" in output) {
+      return { type: "text" as const, value: `TTS failed: ${output.error}` };
+    }
+    return {
+      type: "text" as const,
+      value: `Generated ${output.sizeBytes}-byte MP3 audio (${output.textLength} chars) using ${output.model} voice ${output.voice}.`,
     };
   },
 });

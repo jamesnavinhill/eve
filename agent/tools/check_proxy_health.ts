@@ -1,30 +1,29 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
+import { GATEWAY_BASE_URL, GATEWAY_API_KEY, isGatewayConfigured } from "../lib/gateway";
 
 export default defineTool({
   description:
     "Check the health and configuration of the Agency Gateway. Probes the unified endpoint for chat, image, and audio services — reports model counts per modality and liveliness status.",
   inputSchema: z.object({}),
   async execute() {
-    const baseUrl = process.env.AGENCY_GATEWAY_BASE_URL;
-    const apiKey = process.env.AGENCY_GATEWAY_API_KEY;
-
-    if (!baseUrl) {
+    if (!isGatewayConfigured()) {
       return {
         mode: "not-configured",
         message: "Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env",
       };
     }
 
+    const authHeaders = { Authorization: `Bearer ${GATEWAY_API_KEY}` };
     const results: Record<string, unknown> = {
-      gateway: baseUrl,
-      hasKey: apiKey ? apiKey.length > 0 : false,
+      gateway: GATEWAY_BASE_URL,
+      hasKey: GATEWAY_API_KEY.length > 0,
     };
 
     // Probe /v1/models (unified — front door merges chat + image + audio catalogs)
     try {
-      const modelsResponse = await fetch(`${baseUrl}/models`, {
-        headers: { Authorization: `Bearer ${apiKey ?? ""}` },
+      const modelsResponse = await fetch(`${GATEWAY_BASE_URL}/models`, {
+        headers: authHeaders,
       });
       results.modelsEndpoint = { reachable: modelsResponse.ok, status: modelsResponse.status };
       if (modelsResponse.ok) {
@@ -57,8 +56,8 @@ export default defineTool({
 
     // Probe /health/liveliness (unified gateway health — front door requires auth)
     try {
-      const healthResponse = await fetch(`${baseUrl}/health/liveliness`, {
-        headers: { Authorization: `Bearer ${apiKey ?? ""}` },
+      const healthResponse = await fetch(`${GATEWAY_BASE_URL}/health/liveliness`, {
+        headers: authHeaders,
       });
       results.liveliness = { reachable: healthResponse.ok, status: healthResponse.status };
     } catch (error) {
@@ -70,8 +69,8 @@ export default defineTool({
 
     // Probe /health/readiness (checks all three upstream services)
     try {
-      const readyResponse = await fetch(`${baseUrl}/health/readiness`, {
-        headers: { Authorization: `Bearer ${apiKey ?? ""}` },
+      const readyResponse = await fetch(`${GATEWAY_BASE_URL}/health/readiness`, {
+        headers: authHeaders,
       });
       if (readyResponse.ok) {
         const body = (await readyResponse.json()) as {

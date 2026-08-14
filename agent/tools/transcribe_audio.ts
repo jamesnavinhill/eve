@@ -1,5 +1,6 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
+import { GATEWAY_BASE_URL, gatewayAuthHeaders, isGatewayConfigured } from "../lib/gateway";
 
 export default defineTool({
   description:
@@ -20,10 +21,7 @@ export default defineTool({
       ),
   }),
   async execute({ audioBase64, filename, model }) {
-    const baseUrl = process.env.AGENCY_GATEWAY_BASE_URL;
-    const apiKey = process.env.AGENCY_GATEWAY_API_KEY;
-
-    if (!baseUrl || !apiKey) {
+    if (!isGatewayConfigured()) {
       return {
         error:
           "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
@@ -53,10 +51,10 @@ export default defineTool({
       Buffer.from(closingBoundary, "utf-8"),
     ]);
 
-    const response = await fetch(`${baseUrl}/audio/transcriptions`, {
+    const response = await fetch(`${GATEWAY_BASE_URL}/audio/transcriptions`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        ...gatewayAuthHeaders(),
         "Content-Type": `multipart/form-data; boundary=${boundary}`,
       },
       body,
@@ -75,4 +73,6 @@ export default defineTool({
       text: result.text ?? "",
     };
   },
+  // The transcription text IS the useful output the model needs — no
+  // toModelOutput projection. The model should see the full result.
 });

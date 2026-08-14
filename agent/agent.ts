@@ -1,15 +1,5 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import { defineAgent } from "eve";
-
-// Agency Gateway — LiteLLM proxy at gateway.jami.studio
-// OpenAI-compatible Chat Completions endpoint. Model names are LiteLLM
-// aliases defined in agency/config/litellm/config.yaml.
-// Default: glm-5-2 (Neon AI Gateway route). Also available: z-ai-glm-5.2
-// (NVIDIA NIM route), claude-sonnet-5, gpt-5, gemini-3-5-flash, etc.
-const gateway = createOpenAI({
-  baseURL: process.env.AGENCY_GATEWAY_BASE_URL ?? "https://gateway.jami.studio/v1",
-  apiKey: process.env.AGENCY_GATEWAY_API_KEY ?? "",
-});
+import { gateway } from "./lib/gateway";
 
 export default defineAgent({
   // GLM 5.2: 128K context window, 4K max output (Neon AI Gateway route).

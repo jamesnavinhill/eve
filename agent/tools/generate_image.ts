@@ -1,5 +1,6 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
+import { GATEWAY_BASE_URL, gatewayAuthHeaders, isGatewayConfigured } from "../lib/gateway";
 
 export default defineTool({
   description:
@@ -20,22 +21,16 @@ export default defineTool({
       .describe("Output image dimensions."),
   }),
   async execute({ prompt, model, size }) {
-    const baseUrl = process.env.AGENCY_GATEWAY_BASE_URL;
-    const apiKey = process.env.AGENCY_GATEWAY_API_KEY;
-
-    if (!baseUrl || !apiKey) {
+    if (!isGatewayConfigured()) {
       return {
         error:
           "Gateway not configured. Set AGENCY_GATEWAY_BASE_URL and AGENCY_GATEWAY_API_KEY in .env.",
       };
     }
 
-    const response = await fetch(`${baseUrl}/images/generations`, {
+    const response = await fetch(`${GATEWAY_BASE_URL}/images/generations`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: gatewayAuthHeaders(),
       body: JSON.stringify({ model, prompt, n: 1, size }),
     });
 
@@ -62,6 +57,18 @@ export default defineTool({
       // The agent can reference this in session state or write it to disk.
       b64_json: image.b64_json,
       url: image.url,
+    };
+  },
+  // The model can't see image pixels — the base64 is wasted context. Project
+  // it down to a text summary. The full output (including b64_json) still
+  // flows to the channel stream and hooks for frontend rendering.
+  toModelOutput(output) {
+    if ("error" in output) {
+      return { type: "text" as const, value: `Image generation failed: ${output.error}` };
+    }
+    return {
+      type: "text" as const,
+      value: `Generated ${output.size} image using ${output.model} for: "${output.prompt}".`,
     };
   },
 });
