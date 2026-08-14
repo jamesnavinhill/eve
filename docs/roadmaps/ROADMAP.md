@@ -1,7 +1,7 @@
 # Eve — Studio Internal Agent Roadmap
 
 > Status: **Phase 0 — Foundation scaffolded** (2026-08-13)
-> Repo: `jamesnavinhill/eve-agent` (this project) | Fork: `jamesnavinhill/eve` (sibling, fork of `vercel/eve`) | Source: `vercel/eve` v0.37.0
+> Repo: `jamesnavinhill/eve` (this project) | Fork: `jamesnavinhill/eve-source-code` (sibling, fork of `vercel/eve`) | Source: `vercel/eve` v0.37.0
 
 ---
 
@@ -205,7 +205,7 @@ Tools run in the **app runtime** with full access to `process.env`. The sandbox 
 
 ### "Should source-code/ move outside eve?"
 
-**Resolved:** Moved to sibling `c:\Users\james\projects\eve-source-code` (GitHub: `jamesnavinhill/eve`, a fork of `vercel/eve`). Added as a VS Code workspace folder. Sync via `git fetch upstream main && git merge upstream/main` or GitHub's "Sync fork" button. No in-repo sync workflow.
+**Resolved:** Moved to sibling `c:\Users\james\projects\eve-source-code` (GitHub: `jamesnavinhill/eve-source-code`, a fork of `vercel/eve`). Added as a VS Code workspace folder. Sync via `git fetch upstream main && git merge upstream/main` or GitHub's "Sync fork" button. No in-repo sync workflow.
 
 ### "Should we symlink or npx-install skills?"
 

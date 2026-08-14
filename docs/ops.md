@@ -66,7 +66,7 @@ Both are gitignored. Delete `.eve/` to force a full recompile.
 
 ## Upstream sync
 
-The fork of `vercel/eve` lives in a sibling repo at `../eve-source-code/` (GitHub: `jamesnavinhill/eve`, a fork of `vercel/eve`). Sync it directly:
+The fork of `vercel/eve` lives in a sibling repo at `../eve-source-code/` (GitHub: `jamesnavinhill/eve-source-code`, a fork of `vercel/eve`). Sync it directly:
 
 ```sh
 cd ../eve-source-code
