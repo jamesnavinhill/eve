@@ -14,7 +14,7 @@
 The Agency Gateway front door (`agency_api_gateway.py` on `:8790`) requires a Bearer token on **every** request, including health probes. The token is `LITELLM_MASTER_KEY` on the droplet, mirrored as `AGENCY_DO_MASTER_KEY` in the local agency `.env`, and copied into `eve/.env` as `AGENCY_GATEWAY_API_KEY`.
 
 ```
-Authorization: Bearer sk-e9329a7a...
+Authorization: Bearer <AGENCY_GATEWAY_API_KEY>
 ```
 
 ## Channel auth (eve HTTP API)
