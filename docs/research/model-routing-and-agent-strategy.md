@@ -17,12 +17,12 @@ Eve should consume model metadata from agency through the gateway (`/v1/models`)
 
 Four new models were added to the gateway and synced to local surfaces:
 
-| Alias | Provider | Status |
-|---|---|---|
-| `cf-deepseek-ai-deepseek-v4-pro-0813` | Cloudflare Workers AI | Wired; 403 at call time pending CF account entitlement |
+| Alias                                   | Provider              | Status                                                 |
+| --------------------------------------- | --------------------- | ------------------------------------------------------ |
+| `cf-deepseek-ai-deepseek-v4-pro-0813`   | Cloudflare Workers AI | Wired; 403 at call time pending CF account entitlement |
 | `cf-deepseek-ai-deepseek-v4-flash-0731` | Cloudflare Workers AI | Wired; 403 at call time pending CF account entitlement |
-| `meta-muse-glimmer-30b` | NVIDIA API Catalog | Wired; live probe OK |
-| `nvidia-nemotron-3-5-lightning-30b-a3b` | NVIDIA API Catalog | Wired; live probe OK |
+| `meta-muse-glimmer-30b`                 | NVIDIA API Catalog    | Wired; live probe OK                                   |
+| `nvidia-nemotron-3-5-lightning-30b-a3b` | NVIDIA API Catalog    | Wired; live probe OK                                   |
 
 Commit: `studio-jami/agency@d3216b0` on `main`.
 
@@ -42,9 +42,23 @@ DO gateway needs a restart/redeploy from the latest config before the DO-Agency 
 
 4. **Gateway-level fallback is the eventual upstream fix; Eve tests it first.** LiteLLM `router_settings.fallbacks` will be added later in agency once we know the call-shape behavior. Until then, Eve's `agent/lib/models.ts` returns a deterministic ordered group for each intent.
 
-## Open decisions before Eve implementation
+## Eve implementation — done in this session
 
-1. **Model metadata flow.** Should `agent/lib/models.ts` hardcode context windows copied from `agency/config/preferred_models.yaml`, or should Eve fetch them from gateway `/v1/models` at runtime?
-2. **Group selection API.** Each subagent's `agent.ts` calls `selectModel(intent)` with a fixed intent string (`coding`, `audit`, `research`, `creative`, `bounded-task`). Agree on naming?
-3. **Vision routing.** Defer until after base routing is working; possible future: route image turns to a vision subagent or use a vision-capable model directly.
-4. **Next Eve slice:** replace the hardcoded `agent.ts` model and scaffold the shared model-router library, *before* declaring subagents.
+Implemented the hybrid Eve orchestrator model router:
+
+- `agent/lib/models.ts` — canonical ordered CF preference list (YRKA > JAMI, Kimi K2.7-code > GLM 5.2 > Kimi K2.6 > Gemma 4), with runtime `/v1/models` availability check (cached, non-blocking), vision skip for GLM 5.2, and graceful fallback to the hardcoded top preference.
+- `agent/agent.ts` — replaced `gateway.chat("glm-5-2")` and hardcoded `modelContextWindowTokens: 128_000` with `defineDynamic({ step.started: selectEveModel })`.
+
+Verification:
+
+- `pnpm typecheck` — PASS
+- `pnpm lint` — PASS
+- `pnpm fmt` — PASS
+- `npx eve info` — PASS, 0 errors/warnings
+- `pnpm dev` smoke test — created a session, message routed to `openai/cf-yrka-moonshotai-kimi-k2-7-code`, returned "OK".
+
+## Remaining open decisions
+
+1. **Group selection API for subagents.** Each declared subagent (`coding`, `audit`, `research`, `creative`, `bounded-task`) will call `selectModel(intent)` with a fixed intent string. Agree on naming?
+2. **Gateway-level fallback.** Once Eve routing is proven, move the ordered fallback into LiteLLM `router_settings.fallbacks` in agency so all surfaces benefit.
+3. **Next Eve slice:** scaffold the subagent filesystem and connect each subagent to its model group.
