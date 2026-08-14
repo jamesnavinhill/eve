@@ -8,6 +8,7 @@
     "build": "eve build",
     "start": "eve start",
     "info": "eve info",
+    "sync": "pwsh scripts/sync-fork.ps1",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
