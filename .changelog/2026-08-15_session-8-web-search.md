@@ -15,12 +15,12 @@ Eve's built-in web search is provider-managed and only supports Exa or Parallel 
 
 ## Built-in options considered
 
-| Option | Notes |
-| ------ | ----- |
-| `eve/tools` `webSearch({ provider: "exa" })` | Native Exa integration; requires `EXA_API_KEY`. |
+| Option                                            | Notes                                                   |
+| ------------------------------------------------- | ------------------------------------------------------- |
+| `eve/tools` `webSearch({ provider: "exa" })`      | Native Exa integration; requires `EXA_API_KEY`.         |
 | `eve/tools` `webSearch({ provider: "parallel" })` | Native Parallel integration; requires Parallel API key. |
-| Custom Tavily tool | Better agent-native results format; what we shipped. |
-| Custom Brave / Firecrawl tool | Possible later if Tavily limits become an issue. |
+| Custom Tavily tool                                | Better agent-native results format; what we shipped.    |
+| Custom Brave / Firecrawl tool                     | Possible later if Tavily limits become an issue.        |
 
 ## Verified
 
