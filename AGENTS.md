@@ -19,9 +19,10 @@ project is the source of truth for:
 - PostHog and Sentry project credentials (shared with this agent)
 - API keys and provider credentials
 
-We will have other providers, but they will likely route through the same
-LiteLLM proxy. When model config or gateway behavior changes, verify against
-the live gateway, not just the agency repo's files.
+Eve's chat model is the `eve-orchestrator` alias, a LiteLLM fallback group
+that tries CF models in deterministic order (YRKA > JAMI; Kimi K2.7-code >
+Kimi K2.6 > Gemma 4). When model config or gateway behavior changes, verify
+against the live gateway, not just the agency repo's files.
 
 ## Source truth
 
@@ -107,7 +108,8 @@ eve/                              <- this repo (agent project)
     instrumentation.ts            <- PostHog + Sentry tracing setup
     instructions.md               <- agent identity + standing rules
     channels/                     <- HTTP channel with auth
-    tools/                        <- gateway tools (chat, image, audio)
+    tools/                        <- custom tools + host-native overrides
+                                  (search, image, audio, shell, files, gateway)
   .agents/skills/                 <- VS Code Copilot skills (symlinked from fork)
   .changelog/                     <- session-by-session record
   .github/dependabot.yml          <- weekly npm updates

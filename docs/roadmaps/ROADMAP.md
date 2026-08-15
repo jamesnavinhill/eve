@@ -16,16 +16,28 @@ eve/                          ← your agent project (this repo)
 ├── .env.example              ← model credentials template
 ├── .gitignore                ← ignores node_modules/, .env, build artifacts
 ├── agent/
-│   ├── agent.ts              ← model config (glm-5-2 via Agency Gateway)
+│   ├── agent.ts              ← model config (eve-orchestrator fallback alias)
 │   ├── instructions.md       ← Eve identity + standing rules
 │   ├── channels/
 │   │   └── eve.ts            ← HTTP channel with auth walk (vercelOidc + localDev)
+│   ├── lib/
+│   │   ├── gateway.ts        ← shared Agency Gateway provider
+│   │   └── host-tools.ts     ← host-native bash/read/write/glob/grep helpers
 │   └── tools/
 │       ├── whoami.ts         ← returns the signed-in principal
 │       ├── check_proxy_health.ts ← probes all three gateway lanes
 │       ├── generate_image.ts ← FLUX image generation via Workers AI
 │       ├── text_to_speech.ts ← Aura TTS via Workers AI
-│       └── transcribe_audio.ts ← Whisper STT via Workers AI
+│       ├── transcribe_audio.ts ← Whisper STT via Workers AI
+│       ├── bash.ts           ← host-native shell override
+│       ├── read_file.ts      ← host-native file read override
+│       ├── write_file.ts     ← host-native file write override
+│       ├── glob.ts           ← host-native glob override
+│       ├── grep.ts           ← host-native grep override
+│       ├── web_search.ts     ← Tavily web search
+│       ├── exa_search.ts     ← Exa neural search
+│       ├── brave_search.ts   ← Brave web search
+│       └── firecrawl_search.ts ← Firecrawl web search
 ├── docs/                     ← our own docs (architecture, config, ops, security)
 │   ├── research/             ← research notes and explorations
 │   └── roadmaps/             ← phased roadmap and planning
@@ -35,17 +47,20 @@ eve/                          ← your agent project (this repo)
 ### What works now
 
 - ✅ `pnpm install` — all dependencies resolved
-- ✅ `pnpm exec eve info` — agent discovered: 5 tools, instructions loaded, 0 errors
-- ✅ `pnpm exec eve build` — compiles to Nitro server under `.output/`
-- ✅ `pnpm exec eve dev` → live chat through Agency Gateway ("Hello, how can I help you today?")
-- ✅ Image generation (FLUX schnell), TTS (Aura-2), health check all verified live
+- ✅ `pnpm build` / `pnpm dev` / `pnpm typecheck` / `pnpm lint` / `pnpm fmt` all green
+- ✅ Model routed through `eve-orchestrator` gateway alias with deterministic CF fallback
+- ✅ Host-native shell/file tools: `bash`, `read_file`, `write_file`, `glob`, `grep`
+- ✅ Four web search tools: Tavily, Exa, Brave, Firecrawl (all live-verified)
+- ✅ Image generation (FLUX), TTS (Aura-2), STT (Whisper) verified
+- ✅ Gateway health probe via `check_proxy_health`
+- ✅ `whoami` for session principal introspection
 
 ### Gateway integration (✅ Done)
 
 - Agency Gateway at `https://gateway.jami.studio/v1` — OpenAI-compatible (LiteLLM)
-- Model: `glm-5-2` via Neon AI Gateway route, 128K context window
-- 5 tools covering all three gateway lanes (chat, image, audio)
-- 191 models available across chat (131), image (33), TTS (12), STT (15)
+- Model: `eve-orchestrator` fallback group via Agency Gateway, 256K context window
+- Tools covering chat, image, audio, web search, shell, and filesystem
+- ~200 models available across chat, image, TTS, STT
 
 ---
 
@@ -79,16 +94,18 @@ Work nests in three levels:
 
 If the process crashes mid-turn, it resumes from the last completed step. No replay needed.
 
-### Trust boundaries
+### Trust boundaries (local-dev posture)
 
-|                         | App runtime  | Sandbox               |
-| ----------------------- | ------------ | --------------------- |
-| `process.env` / secrets | ✅ Yes       | ❌ No                 |
-| Your Node.js code       | ✅ Yes       | ❌ No                 |
-| Network                 | Unrestricted | Controlled by policy  |
-| Filesystem              | App's own    | Isolated `/workspace` |
+We intentionally run shell and file tools on the **host** instead of the sandbox so the agent shares the developer environment. This is the right trade-off for an internal, trusted agent; production isolation can be reintroduced later if needed.
 
-Tools run in the **app runtime** with full access to `process.env`. The sandbox is where the model runs shell commands — it never sees your secrets.
+|                         | App runtime (tools) | Host shell/file tools |
+| ----------------------- | ------------------- | --------------------- |
+| `process.env` / secrets | ✅ Full access      | ✅ Inherits from env  |
+| Your Node.js code       | ✅ Runs directly    | ❌ Not involved       |
+| Network                 | Unrestricted        | Unrestricted          |
+| Filesystem              | App's own           | Host filesystem       |
+
+Tools run in the **app runtime** with full access to `process.env`. The built-in `bash` / file tools are overridden to execute directly on the host machine.
 
 ### Two ways to delegate to subagents
 
@@ -101,18 +118,18 @@ Tools run in the **app runtime** with full access to `process.env`. The sandbox 
 
 ### 1. Model & Proxy API
 
-**Status:** ✅ Wired and verified. `glm-5-2` via Agency Gateway (LiteLLM, Chat Completions API).
+**Status:** ✅ Wired and verified. `eve-orchestrator` via Agency Gateway (LiteLLM, Chat Completions API).
 
 **Current config:**
 
 - `@ai-sdk/openai` with custom `baseURL` → `gateway.jami.studio/v1`
-- `.chat("glm-5-2")` forces Chat Completions (LiteLLM doesn't support Responses API)
-- `modelContextWindowTokens: 128_000` for compaction
-- Switch models by changing the alias string — 191 available
+- `.chat("eve-orchestrator")` resolves to a LiteLLM fallback group
+- `modelContextWindowTokens: 256_000` for compaction
+- Fallback order: YRKA > JAMI; Kimi K2.7-code > Kimi K2.6 > Gemma 4
 
 ### 2. Tools (typed actions)
 
-**Status:** 5 tools. All gateway lanes covered.
+**Status:** 13 tools. Chat, image, audio, web search, shell, and filesystem covered.
 
 **Current tools:**
 
@@ -121,6 +138,11 @@ Tools run in the **app runtime** with full access to `process.env`. The sandbox 
 - `generate_image` — FLUX image generation (cf-img-flux-1-schnell default)
 - `text_to_speech` — Aura TTS (cf-tts-aura-2-en default)
 - `transcribe_audio` — Whisper STT (cf-stt-whisper-large-v3-turbo default)
+- `bash` / `read_file` / `write_file` / `glob` / `grep` — host-native filesystem/shell overrides
+- `web_search` — Tavily
+- `exa_search` — Exa neural search
+- `brave_search` — Brave web search
+- `firecrawl_search` — Firecrawl web search
 
 ### 3. Connections (MCP + OpenAPI)
 
@@ -181,11 +203,11 @@ Tools run in the **app runtime** with full access to `process.env`. The sandbox 
 
 ### 8. Sandbox (isolated execution)
 
-**Status:** Default framework sandbox.
+**Status:** Host-native overrides in place; default sandbox unused locally.
 
-**What it does:** Gives the model a `/workspace` filesystem where it can run bash, read/write files, and execute scripts — without touching app runtime secrets.
+**What it does:** By default, eve provides a `/workspace` filesystem for shell/file tools. We override those tools so the agent operates on the host filesystem instead. This matches the developer environment and avoids needing Docker Desktop locally.
 
-**Backends:** Local (dev), Vercel Sandbox (Vercel deploy), Docker (self-host), microsandbox.
+**Backends:** Default backends remain available (just-bash, Docker, microsandbox, Vercel). We can re-enable sandbox isolation later by removing the override files under `agent/tools/`.
 
 ### 9. State (durable memory)
 
@@ -244,54 +266,55 @@ Tools run in the **app runtime** with full access to `process.env`. The sandbox 
 
 ### Phase 1: Gateway integration (✅ Done)
 
-- [x] Wire Agency Gateway — `gateway.chat("glm-5-2")` forces Chat Completions API
-- [x] `modelContextWindowTokens: 128_000` for compaction (custom model not in AI Gateway catalog)
+- [x] Wire Agency Gateway — `gateway.chat("eve-orchestrator")` fallback group
+- [x] `modelContextWindowTokens: 256_000` for compaction
 - [x] `check_proxy_health` — probes /models, /health/liveliness, /health/readiness; reports modalities
 - [x] `generate_image` — POST /v1/images/generations (FLUX models via Workers AI)
 - [x] `text_to_speech` — POST /v1/audio/speech (Aura TTS via Workers AI)
 - [x] `transcribe_audio` — POST /v1/audio/transcriptions (Whisper STT via Workers AI)
-- [x] All verified end-to-end through eve dev TUI
-- [x] 191 models across chat (131), image (33), TTS (12), STT (15)
+- [x] Host-native overrides for `bash`, `read_file`, `write_file`, `glob`, `grep`
+- [x] Web search tools: Tavily, Exa, Brave, Firecrawl
+- [x] All verified end-to-end through `pnpm dev` sessions
 
-### Phase 1.5: Core wiring (next)
+### Phase 1.5: Core wiring (✅ Done)
 
-- [ ] Add first real tools (your internal API callers)
-- [ ] Add first connection (MCP or OpenAPI to an external service)
-- [ ] Test durable sessions (crash → resume → verify)
-- [ ] Explore the sandbox (seed workspace files, run scripts)
+- [x] Add real tools (search, shell, filesystem)
+- [x] Durable sessions verified through reconnectable streams
+- [x] Host filesystem access works without Docker sandbox
 
-### Phase 2: Channels & delegation
+### Phase 2: Voice & avatar integration (next)
 
-- [ ] Choose first non-HTTP channel (Slack? Discord? Telegram?)
+- [ ] Decide where `text_to_speech` / `transcribe_audio` belong: root agent, subagent, or removed in favor of ElevenLabs
+- [ ] Evaluate: ElevenLabs + Anam as a channel, remote agent, or top-layer orchestrator
+- [ ] Reference: `c:\Users\james\orgs\oss\avatar-agent` (dormant but working)
+- [ ] Reference: `c:\Users\james\projects\gardens` (multi-provider ElevenLabs/Anam)
+- [ ] Design: voice/video as uninterrupted top-layer, Eve executes background tasks via HTTP sessions
+- [ ] Agnostic seams: no vendor lock-in (multiple providers, multiple accounts)
+
+### Phase 3: Channels & delegation
+
+- [ ] Choose first non-HTTP channel (Slack? Discord? Telegram? GitHub?)
 - [ ] Add first declared subagent (researcher? coder?)
 - [ ] Add a schedule (daily digest or heartbeat)
 - [ ] Add `defineState` for session memory
 
-### Phase 3: Voice & avatar integration
-
-- [ ] Evaluate: ElevenLabs + Anam as a channel, remote agent, or top-layer orchestrator
-- [ ] Reference: `c:\Users\james\orgs\oss\avatar-agent` (dormant but working)
-- [ ] Reference: `c:\Users\james\projects\gardens` (multi-provider ElevenLabs/Anam)
-- [ ] Design: voice as uninterrupted top-layer, background agents execute tasks
-- [ ] Agnostic seams: no vendor lock-in (multiple providers, multiple accounts)
-
 ### Phase 4: Production deployment
 
 - [ ] Choose: Vercel (managed Workflow + Sandbox + Cron) or self-host (Node + Docker)
-- [ ] Replace `placeholderAuth`/`localDev` with real route auth
-- [ ] Add OpenTelemetry instrumentation
+- [ ] Replace `localDev` with real route auth
+- [ ] Harden or re-enable sandbox isolation if needed
 - [ ] Set up evals for agent behavior
-- [ ] Configure sandbox network policy
 
 ---
 
-## Key decisions for you
+## Key decisions
 
 1. ~~**Proxy API format**~~ ✅ OpenAI-compatible (LiteLLM Chat Completions). Resolved.
-2. **Deployment target** — Vercel (managed) or self-host? (affects Workflow/Sandbox/Cron)
-3. **First channel beyond HTTP** — GitHub (your pick). Slack/Discord/Telegram later.
-4. ~~**source-code/ location**~~ ✅ Moved to sibling `c:\Users\james\projects\eve-source-code` + workspace folder.
-5. **Voice integration approach** — channel? remote agent? top-layer orchestrator? (needs ElevenLabs + EVE official docs review together)
+2. ~~**Model/routing**~~ ✅ `eve-orchestrator` gateway alias with ordered CF fallback. Resolved.
+3. ~~**Sandbox for local dev**~~ ✅ Host-native shell/file overrides. Resolved.
+4. **Voice integration approach** — channel? remote agent? top-layer orchestrator? (needs ElevenLabs + EVE official docs review together)
+5. **Deployment target** — Vercel (managed) or self-host? (affects Workflow/Sandbox/Cron)
+6. **First channel beyond HTTP** — GitHub? Slack/Discord/Telegram?
 
 ---
 

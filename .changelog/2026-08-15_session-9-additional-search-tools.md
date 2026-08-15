@@ -13,11 +13,11 @@ Building on the Tavily `web_search` tool, we now expose one tool per search prov
 
 ## Available search tools
 
-| Tool | Provider | Best for |
-| ---- | -------- | -------- |
-| `web_search` | Tavily | Fast AI-native search with a synthesized answer. |
-| `exa_search` | Exa | Semantic/neural search and technical content retrieval. |
-| `brave_search` | Brave | Privacy-focused general web search. |
+| Tool               | Provider  | Best for                                                 |
+| ------------------ | --------- | -------------------------------------------------------- |
+| `web_search`       | Tavily    | Fast AI-native search with a synthesized answer.         |
+| `exa_search`       | Exa       | Semantic/neural search and technical content retrieval.  |
+| `brave_search`     | Brave     | Privacy-focused general web search.                      |
 | `firecrawl_search` | Firecrawl | Real-time search with clean, extracted markdown content. |
 
 ## Verified

@@ -28,24 +28,25 @@ The eve HTTP channel (`agent/channels/eve.ts`) uses an auth walk:
 
 ## Trust boundaries
 
-Eve separates two execution contexts:
+We run shell and file tools directly on the **host** instead of inside eve's sandbox. This is a deliberate local-dev posture: the agent shares the developer environment and can run any binary or script you can run. It is the right trade-off for an internal, trusted agent; production deployment may re-enable sandbox isolation if needed.
 
-|                         | App runtime (tools) | Sandbox (model shell) |
+|                         | App runtime (tools) | Host shell/file tools |
 | ----------------------- | ------------------- | --------------------- |
-| `process.env` / secrets | ✅ Full access      | ❌ No access          |
-| Your Node.js code       | ✅ Runs directly    | ❌ Isolated           |
-| Network                 | Unrestricted        | Controlled by policy  |
-| Filesystem              | App's own           | Isolated `/workspace` |
+| `process.env` / secrets | ✅ Full access      | ✅ Inherits from env  |
+| Your Node.js code       | ✅ Runs directly    | ❌ Not involved       |
+| Network                 | Unrestricted        | Unrestricted          |
+| Filesystem              | App's own           | Host filesystem       |
 
-Tools run in the **app runtime** with full access to `process.env` — our gateway tools read `AGENCY_GATEWAY_API_KEY` from here. The model's sandbox is isolated and never sees secrets.
+Tools run in the **app runtime** with full access to `process.env` — our gateway and search tools read `AGENCY_GATEWAY_API_KEY`, `TAVILY_API_KEY`, etc. from here. The host shell/file tools inherit the same environment and filesystem access.
 
 ## What the model can and cannot do
 
-| Can                                                | Cannot                                                        |
-| -------------------------------------------------- | ------------------------------------------------------------- |
-| Call all 5 tools (health, image, TTS, STT, whoami) | See `AGENCY_GATEWAY_API_KEY` directly                         |
-| Read/write files in the sandbox `/workspace`       | Access `process.env` from sandbox                             |
-| Run bash commands in sandbox                       | Make arbitrary network calls from sandbox (policy-controlled) |
+| Can                                                     | Cannot                                                  |
+| ------------------------------------------------------- | ------------------------------------------------------- |
+| Call all tools (health, image, TTS, STT, search, shell) | See secret values directly (only the code reads them)   |
+| Read/write files anywhere on the host                   | Escape the host OS privileges of the running process    |
+| Run arbitrary shell commands on the host                | Access secrets it is not explicitly given via tool code |
+| Search the web through four providers                   | —                                                       |
 
 ## Gateway key rotation
 

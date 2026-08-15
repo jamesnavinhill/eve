@@ -8,6 +8,10 @@ Copy `.env.example` → `.env` and fill in:
 | ------------------------- | -------- | ---------------------------------------------------------------------- |
 | `AGENCY_GATEWAY_BASE_URL` | Yes      | Gateway endpoint. Live: `https://gateway.jami.studio/v1`               |
 | `AGENCY_GATEWAY_API_KEY`  | Yes      | Gateway master key (mirrors `AGENCY_DO_MASTER_KEY` from agency `.env`) |
+| `TAVILY_API_KEY`          | No       | Tavily web search (used by `web_search`)                               |
+| `EXA_API_KEY`             | No       | Exa neural search (used by `exa_search`)                               |
+| `BRAVE_API_KEY`           | No       | Brave web search (used by `brave_search`)                              |
+| `FIRECRAWL_API_KEY`       | No       | Firecrawl web search (used by `firecrawl_search`)                      |
 | `POSTHOG_PROJECT_TOKEN`   | Yes      | PostHog project token for OTel trace ingestion                         |
 | `POSTHOG_HOST`            | No       | PostHog host (defaults to `https://us.i.posthog.com`)                  |
 | `SENTRY_DSN`              | Yes      | Sentry DSN for error tracking and performance tracing                  |
@@ -22,8 +26,8 @@ const gateway = createOpenAI({
 });
 
 export default defineAgent({
-  model: gateway.chat("glm-5-2"),
-  modelContextWindowTokens: 128_000,
+  model: gateway.chat("eve-orchestrator"),
+  modelContextWindowTokens: 256_000,
   reasoning: "high",
   limits: {
     maxInputTokensPerSession: 40_000_000,
@@ -37,13 +41,13 @@ export default defineAgent({
 
 Change the string in `gateway.chat("model-alias")`. Available aliases are defined in `agency/config/litellm/config.yaml`. Common choices:
 
-| Alias              | Provider        | Notes                               |
-| ------------------ | --------------- | ----------------------------------- |
-| `glm-5-2`          | Neon AI Gateway | Current default, 128K context       |
-| `z-ai-glm-5.2`     | NVIDIA NIM      | Same model, different route         |
-| `claude-sonnet-5`  | Neon            | Anthropic family (omit temperature) |
-| `gpt-5`            | Neon            | OpenAI family                       |
-| `gemini-3-5-flash` | Neon            | Google family, fast + cheap         |
+| Alias              | Provider        | Notes                                    |
+| ------------------ | --------------- | ---------------------------------------- |
+| `eve-orchestrator` | Agency Gateway  | Current default; CF fallback group, 256K |
+| `glm-5-2`          | Neon AI Gateway | 128K context, text-only                  |
+| `claude-sonnet-5`  | Neon            | Anthropic family (omit temperature)      |
+| `gpt-5`            | Neon            | OpenAI family                            |
+| `gemini-3-5-flash` | Neon            | Google family, fast + cheap              |
 
 ### Why `.chat()` not bare `gateway()`
 

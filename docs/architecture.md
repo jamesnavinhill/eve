@@ -8,8 +8,8 @@ Eve is a filesystem-first AI agent built on the [vercel/eve](https://github.com/
 graph TD
     subgraph Agent Process
         EVE[eve runtime<br/>Nitro server]
-        AGENT[agent/agent.ts<br/>GLM-5.2 via Agency Gateway]
-        TOOLS[5 tools<br/>chat, image, TTS, STT, health]
+        AGENT[agent/agent.ts<br/>eve-orchestrator fallback]
+        TOOLS[13 tools<br/>search, shell, files, image, audio, health]
         CH[eve.ts channel<br/>HTTP API + auth walk]
     end
 
@@ -21,15 +21,14 @@ graph TD
     end
 
     subgraph Upstream Providers
-        NEON[Neon AI Gateway<br/>GLM-5.2, Claude, GPT-5]
-        NVIDIA[NVIDIA NIM<br/>GLM-5.2, Llama, etc.]
-        CF[Cloudflare Workers AI<br/>FLUX, Aura, Whisper]
+        NEON[Neon AI Gateway<br/>Claude, GPT-5, Gemini]
+        CF[Cloudflare Workers AI<br/>Kimi, Gemma, FLUX, Aura, Whisper]
     end
 
     USER[User / TUI / API] --> CH --> EVE
     EVE --> AGENT --> GW
     GW --> LITELLM --> NEON
-    LITELLM --> NVIDIA
+    LITELLM --> CF
     GW --> IMG --> CF
     GW --> AUDIO --> CF
 ```
@@ -43,12 +42,24 @@ eve/
 │   ├── instructions.md     ← always-on system prompt (identity + rules)
 │   ├── channels/
 │   │   └── eve.ts          ← HTTP channel with auth walk (vercelOidc + localDev)
+│   ├── lib/
+│   │   ├── gateway.ts             ← shared Agency Gateway provider
+│   │   └── host-tools.ts          ← host-native shell/file helpers
 │   └── tools/
 │       ├── whoami.ts              ← returns the signed-in principal
 │       ├── check_proxy_health.ts ← probes all three gateway lanes
-│       ├── generate_image.ts     ← FLUX image generation via Workers AI
-│       ├── text_to_speech.ts     ← Aura TTS via Workers AI
-│       └── transcribe_audio.ts   ← Whisper STT via Workers AI
+│       ├── generate_image.ts      ← FLUX image generation via Workers AI
+│       ├── text_to_speech.ts      ← Aura TTS via Workers AI
+│       ├── transcribe_audio.ts    ← Whisper STT via Workers AI
+│       ├── bash.ts                ← host-native shell override
+│       ├── read_file.ts           ← host-native file read override
+│       ├── write_file.ts          ← host-native file write override
+│       ├── glob.ts                ← host-native glob override
+│       ├── grep.ts                ← host-native grep override
+│       ├── web_search.ts         ← Tavily web search
+│       ├── exa_search.ts         ← Exa neural search
+│       ├── brave_search.ts       ← Brave web search
+│       └── firecrawl_search.ts   ← Firecrawl web search
 │
 ├── docs/                  ← our own docs (not the upstream framework docs)
 │   ├── architecture.md     ← this file
@@ -58,7 +69,7 @@ eve/
 │   ├── research/           ← research notes and explorations
 │   └── roadmaps/           ← phased roadmap and planning
 │
-├── .agent/skills/         ← skills copied from eve source (reference)
+├── .agents/skills/        ← skills copied from eve source (reference)
 ├── .github/workflows/      ← CI: daily upstream sync
 ├── .gitignore              ← ignores .env, .eve/, .output/, node_modules/
 ├── .env                    ← gateway credentials (gitignored, never committed)
@@ -92,13 +103,14 @@ Never edit `.eve/` by hand. Delete it to force a full recompile.
 2. **Compile** — `eve info` validates; `eve build` compiles to Nitro server
 3. **Run** — `eve dev` (TUI) or `eve start` (HTTP server) — sessions are durable
 4. **Sessions** — long-lived conversations that survive process restarts via `.eve/.workflow-data/`
-5. **Compaction** — when context nears the window limit (128K for GLM-5.2), eve summarizes older turns
+5. **Compaction** — when context nears the window limit (256K for eve-orchestrator), eve summarizes older turns
 
 ## The model
 
-- **Primary:** `glm-5-2` via Neon AI Gateway (LiteLLM alias)
+- **Primary:** `eve-orchestrator` via Agency Gateway (LiteLLM fallback group)
+- **Fallback order:** YRKA > JAMI; Kimi K2.7-code > Kimi K2.6 > Gemma 4
 - **Provider:** `@ai-sdk/openai` with `.chat()` to force Chat Completions API
 - **Why `.chat()`:** LiteLLM doesn't support OpenAI's Responses API; `.chat()` sends to `/v1/chat/completions`
-- **Context window:** 128,000 tokens (set via `modelContextWindowTokens` for compaction)
+- **Context window:** 256,000 tokens (set via `modelContextWindowTokens` for compaction)
 - **Reasoning:** high effort
-- **Switching models:** change the string in `gateway.chat("model-alias")` — all 191 gateway aliases available
+- **Switching models:** change the string in `gateway.chat("model-alias")` — all gateway aliases are available

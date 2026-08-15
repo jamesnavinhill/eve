@@ -55,7 +55,8 @@ Ask Eve in the dev TUI:
 
 - "Use the check_proxy_health tool and tell me what you see"
 - "Use the generate_image tool to create a blue circle"
-- "Use the text_to_speech tool to say hello"
+- "Use the web_search tool to find the latest news about Eve framework"
+- "Use the bash tool to list the files in the current directory"
 
 ## Build artifacts
 
