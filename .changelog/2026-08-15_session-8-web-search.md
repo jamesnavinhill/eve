@@ -28,4 +28,4 @@ Eve's built-in web search is provider-managed and only supports Exa or Parallel 
 - `pnpm lint` — PASS
 - `pnpm fmt` — PASS
 - `pnpm build` — PASS
-- Live smoke test skipped because `TAVILY_API_KEY` is not set in `.env`. Once the key is added, the agent can call `web_search` directly.
+- `pnpm dev` live smoke test — session asked "what is the latest news about tavily"; agent called `web_search`, got back a synthesized answer and 10 result snippets, then produced a summary. Tool works end-to-end.
