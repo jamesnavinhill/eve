@@ -37,7 +37,8 @@ eve/                          ← your agent project (this repo)
 │       ├── web_search.ts     ← Tavily web search
 │       ├── exa_search.ts     ← Exa neural search
 │       ├── brave_search.ts   ← Brave web search
-│       └── firecrawl_search.ts ← Firecrawl web search
+│       ├── firecrawl_search.ts ← Firecrawl web search
+│       └── send_message.ts   ← fixed-owner SMS/MMS through email transports
 ├── docs/                     ← our own docs (architecture, config, ops, security)
 │   ├── research/             ← research notes and explorations
 │   └── roadmaps/             ← phased roadmap and planning
@@ -50,7 +51,8 @@ eve/                          ← your agent project (this repo)
 - ✅ `pnpm build` / `pnpm dev` / `pnpm typecheck` / `pnpm lint` / `pnpm fmt` all green
 - ✅ Model routed through `eve-orchestrator` gateway alias with deterministic CF fallback
 - ✅ Host-native shell/file tools: `bash`, `read_file`, `write_file`, `glob`, `grep`
-- ✅ Four web search tools: Tavily, Exa, Brave, Firecrawl (all live-verified)
+- ✅ Four web search tools behind provider adapters: Tavily, Exa, Brave, Firecrawl (all live-verified)
+- ✅ Proactive owner messaging through a provider-neutral SMS/MMS tool (AgentMail → Verizon live-verified)
 - ✅ Image generation (FLUX), TTS (Aura-2), STT (Whisper) verified
 - ✅ Gateway health probe via `check_proxy_health`
 - ✅ `whoami` for session principal introspection

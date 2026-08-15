@@ -9,7 +9,7 @@ graph TD
     subgraph Agent Process
         EVE[eve runtime<br/>Nitro server]
         AGENT[agent/agent.ts<br/>eve-orchestrator fallback]
-        TOOLS[13 tools<br/>search, shell, files, image, audio, health]
+        TOOLS[15 tools<br/>search, messaging, shell, files, media, health]
         CH[eve.ts channel<br/>HTTP API + auth walk]
     end
 
@@ -44,7 +44,9 @@ eve/
 │   │   └── eve.ts          ← HTTP channel with auth walk (vercelOidc + localDev)
 │   ├── lib/
 │   │   ├── gateway.ts             ← shared Agency Gateway provider
-│   │   └── host-tools.ts          ← host-native shell/file helpers
+│   │   ├── host-tools.ts          ← host-native shell/file helpers
+│   │   ├── search/                ← shared search contract + four provider adapters
+│   │   └── messaging/             ← outbound contract + SMTP/Resend/AgentMail adapters
 │   └── tools/
 │       ├── whoami.ts              ← returns the signed-in principal
 │       ├── check_proxy_health.ts ← probes all three gateway lanes
@@ -59,7 +61,8 @@ eve/
 │       ├── web_search.ts         ← Tavily web search
 │       ├── exa_search.ts         ← Exa neural search
 │       ├── brave_search.ts       ← Brave web search
-│       └── firecrawl_search.ts   ← Firecrawl web search
+│       ├── firecrawl_search.ts   ← Firecrawl web search
+│       └── send_message.ts       ← fixed-owner outbound SMS/MMS
 │
 ├── docs/                  ← our own docs (not the upstream framework docs)
 │   ├── architecture.md     ← this file

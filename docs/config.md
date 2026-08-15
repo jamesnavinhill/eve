@@ -12,10 +12,39 @@ Copy `.env.example` → `.env` and fill in:
 | `EXA_API_KEY`             | No       | Exa neural search (used by `exa_search`)                               |
 | `BRAVE_API_KEY`           | No       | Brave web search (used by `brave_search`)                              |
 | `FIRECRAWL_API_KEY`       | No       | Firecrawl web search (used by `firecrawl_search`)                      |
+| `OUTBOUND_EMAIL_PROVIDER` | No       | Outbound transport: `smtp`, `resend`, or `agentmail`                   |
+| `VERIZON_TEXT_USER_EMAIL` | No       | Fixed owner destination for text-only messages                         |
+| `VERIZON_MMS_USER_EMAIL`  | No       | Fixed owner destination for messages with image attachments            |
+| `SMTP_HOST`               | No       | SMTP transport host                                                    |
+| `SMTP_PORT`               | No       | SMTP transport port                                                    |
+| `SMTP_USER`               | No       | SMTP authentication username                                           |
+| `SMTP_PASSWORD`           | No       | SMTP authentication password                                           |
+| `SMTP_FROM_EMAIL`         | No       | Valid sender address for SMTP messages                                 |
+| `RESEND_API_KEY`          | No       | Resend transport API key                                               |
+| `RESEND_FROM_EMAIL`       | No       | Sender on a verified Resend domain                                     |
+| `AGENTMAIL_API_KEY`       | No       | AgentMail transport API key                                            |
+| `AGENTMAIL_EMAIL_ADDRESS` | No       | AgentMail inbox used as the sender                                     |
 | `POSTHOG_PROJECT_TOKEN`   | Yes      | PostHog project token for OTel trace ingestion                         |
 | `POSTHOG_HOST`            | No       | PostHog host (defaults to `https://us.i.posthog.com`)                  |
 | `SENTRY_DSN`              | Yes      | Sentry DSN for error tracking and performance tracing                  |
 | `SENTRY_ENVIRONMENT`      | No       | Environment tag (defaults to `eve-local`)                              |
+
+## Outbound messaging
+
+`send_message` is a proactive outbound tool, not an inbound channel. Eve sees one
+provider-neutral action. `OUTBOUND_EMAIL_PROVIDER` explicitly selects the email
+transport; there is no fallback chain.
+
+Verizon is the destination adapter rather than the transport. Text-only sends go
+to `VERIZON_TEXT_USER_EMAIL`; image MMS sends go to
+`VERIZON_MMS_USER_EMAIL`. Those fixed addresses stay in `.env` and are never
+provided by the model, so the initial tool cannot message arbitrary recipients.
+
+SMTP, Resend, and AgentMail implement the same transport contract. Resend uses
+Eve's tool-call-derived idempotency key. SMTP uses a deterministic Message-ID.
+AgentMail receives the operation ID as a message header, but its API does not
+document provider-side idempotency, so an interruption during send can still
+create a duplicate.
 
 ## Model configuration (`agent/agent.ts`)
 
