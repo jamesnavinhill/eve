@@ -13,8 +13,8 @@ Copy `.env.example` → `.env` and fill in:
 | `BRAVE_API_KEY`           | No       | Brave web search (used by `brave_search`)                              |
 | `FIRECRAWL_API_KEY`       | No       | Firecrawl web search (used by `firecrawl_search`)                      |
 | `OUTBOUND_EMAIL_PROVIDER` | No       | Outbound transport: `smtp`, `resend`, or `agentmail`                   |
-| `VERIZON_TEXT_USER_EMAIL` | No       | Fixed owner destination for text-only messages                         |
-| `VERIZON_MMS_USER_EMAIL`  | No       | Fixed owner destination for messages with image attachments            |
+| `VERIZON_TEXT_USER_EMAIL` | No       | Fixed owner destination: `<10-digit number>@vtext.com`                 |
+| `VERIZON_MMS_USER_EMAIL`  | No       | Fixed owner destination: `<10-digit number>@vzwpix.com`                |
 | `SMTP_HOST`               | No       | SMTP transport host                                                    |
 | `SMTP_PORT`               | No       | SMTP transport port                                                    |
 | `SMTP_USER`               | No       | SMTP authentication username                                           |
@@ -35,10 +35,13 @@ Copy `.env.example` → `.env` and fill in:
 provider-neutral action. `OUTBOUND_EMAIL_PROVIDER` explicitly selects the email
 transport; there is no fallback chain.
 
-Verizon is the destination adapter rather than the transport. Text-only sends go
-to `VERIZON_TEXT_USER_EMAIL`; image MMS sends go to
-`VERIZON_MMS_USER_EMAIL`. Those fixed addresses stay in `.env` and are never
-provided by the model, so the initial tool cannot message arbitrary recipients.
+Verizon is the destination adapter rather than the transport. Its official
+email-to-text contract uses `<10-digit number>@vtext.com` for text and
+`<10-digit number>@vzwpix.com` for image attachments. Text email must total no
+more than 160 characters including the recipient address, subject, and message.
+The tool validates these constraints before sending. Those fixed addresses stay
+in `.env` and are never provided by the model, so the initial tool cannot message
+arbitrary recipients.
 
 SMTP, Resend, and AgentMail implement the same transport contract. Resend uses
 Eve's tool-call-derived idempotency key. SMTP uses a deterministic Message-ID.

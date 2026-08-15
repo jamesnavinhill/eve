@@ -39,10 +39,18 @@ export default defineTool({
       throw new Error("MMS requires at least one image attachment");
     }
     const attachments = await loadImageAttachments(attachmentPaths);
+    const to = verizonDestination(delivery);
+    const effectiveSubject = subject ?? (delivery === "sms" ? "Eve" : "Eve MMS");
+    const emailToTextLength = to.length + effectiveSubject.length + message.length;
+    if (delivery === "sms" && emailToTextLength > 160) {
+      throw new Error(
+        `SMS email-to-text payload is ${emailToTextLength} characters; Verizon's limit is 160 including recipient, subject, and message`,
+      );
+    }
     const result = await resolveTransport().send(
       {
-        to: verizonDestination(delivery),
-        subject: subject ?? (delivery === "sms" ? "Eve" : "Eve MMS"),
+        to,
+        subject: effectiveSubject,
         text: message,
         attachments,
         operationId: stableOperationId(ctx.callId),

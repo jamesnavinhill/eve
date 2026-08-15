@@ -19,7 +19,7 @@
 - SMTP authentication succeeded against the configured server. Sending is blocked until a valid `SMTP_FROM_EMAIL` is configured; the SMTP username is not an email address.
 - Live Resend domain read-back returned HTTP 200 with no verified domains, so no Resend send was attempted.
 - Live AgentMail read-back returned HTTP 200 and confirmed the configured inbox.
-- Eve sent a text message through `send_message`; AgentMail accepted it and its message API read-back showed the message with the `sent` label addressed to the configured Verizon text gateway.
-- Eve sent a PNG image MMS through `send_message`; AgentMail returned an accepted SES message ID.
+- Eve sent a text message through `send_message`; AgentMail accepted it and its message API read-back showed the message with the `sent` label addressed to `@vtext.com`.
+- The initial PNG attachment test was accepted by AgentMail but used an unverified non-Verizon destination. It did not verify Verizon MMS delivery and was corrected in the following session.
 
-Handset receipt remains outside machine-verifiable provider read-back.
+Provider acceptance is not handset delivery; handset receipt remains outside machine-verifiable provider read-back.

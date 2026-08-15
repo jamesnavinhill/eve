@@ -52,7 +52,7 @@ eve/                          ← your agent project (this repo)
 - ✅ Model routed through `eve-orchestrator` gateway alias with deterministic CF fallback
 - ✅ Host-native shell/file tools: `bash`, `read_file`, `write_file`, `glob`, `grep`
 - ✅ Four web search tools behind provider adapters: Tavily, Exa, Brave, Firecrawl (all live-verified)
-- ✅ Proactive owner messaging through a provider-neutral SMS/MMS tool (AgentMail → Verizon live-verified)
+- ✅ Proactive owner messaging through a provider-neutral SMS/MMS tool (AgentMail provider acceptance live-verified against Verizon's official gateway addresses)
 - ✅ Image generation (FLUX), TTS (Aura-2), STT (Whisper) verified
 - ✅ Gateway health probe via `check_proxy_health`
 - ✅ `whoami` for session principal introspection
