@@ -41,12 +41,12 @@ Tools run in the **app runtime** with full access to `process.env` — our gatew
 
 ## What the model can and cannot do
 
-| Can                                                     | Cannot                                                  |
-| ------------------------------------------------------- | ------------------------------------------------------- |
-| Call all tools (health, image, TTS, STT, search, shell) | See secret values directly (only the code reads them)   |
-| Read/write files anywhere on the host                   | Escape the host OS privileges of the running process    |
-| Run arbitrary shell commands on the host                | Access secrets it is not explicitly given via tool code |
-| Search the web through four providers                   | —                                                       |
+| Can                                                                    | Cannot                                                   |
+| ---------------------------------------------------------------------- | -------------------------------------------------------- |
+| Call all resolved tools, including search, media, messaging, and shell | See secret values unless a tool returns or exposes them  |
+| Read and write files anywhere allowed to the host process              | Exceed the host OS privileges of the running process     |
+| Run arbitrary shell commands with the host process's privileges        | Access credentials absent from the process environment   |
+| Trigger configured external side effects                               | Prove downstream delivery from provider acceptance alone |
 
 ## Gateway key rotation
 

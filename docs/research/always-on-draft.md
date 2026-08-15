@@ -1,4 +1,8 @@
-# Draft
+# Historical always-on draft
+
+> Early design exploration retained for decision history. It predates the current
+> gateway routing, host-native tools, search adapters, and messaging work. It is
+> not an operating guide.
 
 TTS / avatar / intent router LLM / subagent / subagent / subagent / output router LLM / images / tool results / channels / channels / subsubagent / subsubagent
 

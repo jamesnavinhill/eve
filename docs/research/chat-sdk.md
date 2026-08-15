@@ -5,7 +5,12 @@ description: Bridge any Vercel Chat SDK adapter — Slack, Discord, Telegram, Wh
 
 # Chat SDK
 
-
+> Reference snapshot of the upstream eve Chat SDK channel documentation, kept
+> nearby for upcoming communication work. The installed runtime documentation at
+> `node_modules/eve/docs/channels/chat-sdk.mdx` is authoritative for this project.
+> This file does not describe a channel currently configured in Eve. Relative
+> links below assume the upstream eve documentation layout and may not resolve in
+> this project repository.
 
 The Chat SDK channel connects your agent to any [Vercel Chat SDK](https://chat-sdk.dev) adapter. You pick an adapter (`@chat-adapter/slack`, `@resend/chat-sdk-adapter`, and so on), register handlers for the messages you care about, and call `send` to hand each turn to eve. Use it to reach a surface eve does not ship a first-class channel for, or when you want to manage credentials and state with the Chat SDK's own primitives rather than [Vercel Connect](../guides/auth-and-route-protection). See [Channels](./overview) for the contract this builds on.
 
@@ -89,9 +94,9 @@ Use `routes` when a provider requires a fixed URL or when you are migrating an e
 
 You choose which Chat SDK events start a turn by registering handlers on `bot` and calling `send`:
 
-* `bot.onNewMention(thread, message)` fires on a fresh `@mention` (or, for surfaces like email, a new inbound thread). Call `thread.subscribe()` when you want later replies in the same thread to keep reaching the agent.
-* `bot.onSubscribedMessage(thread, message)` fires on subsequent messages in a subscribed thread.
-* `bot.onAction`, `bot.onReaction`, and `bot.onSlashCommand` are available for adapters that emit them.
+- `bot.onNewMention(thread, message)` fires on a fresh `@mention` (or, for surfaces like email, a new inbound thread). Call `thread.subscribe()` when you want later replies in the same thread to keep reaching the agent.
+- `bot.onSubscribedMessage(thread, message)` fires on subsequent messages in a subscribed thread.
+- `bot.onAction`, `bot.onReaction`, and `bot.onSlashCommand` are available for adapters that emit them.
 
 `send(input, options)` starts or resumes the eve session. The `thread` you pass determines the continuation token and the persisted channel state, so replies land back on the originating thread:
 
@@ -224,10 +229,9 @@ Any other Chat SDK `ChatConfig` field (for example `concurrency`) is accepted an
 
 ## What to read next
 
-* [Channels overview](./overview): the channel contract and every built-in channel
-* [Custom channels](./custom): build a channel for any surface with `defineChannel`
-* [Auth & route protection](../guides/auth-and-route-protection): authenticating inbound traffic
-
+- [Channels overview](./overview): the channel contract and every built-in channel
+- [Custom channels](./custom): build a channel for any surface with `defineChannel`
+- [Auth & route protection](../guides/auth-and-route-protection): authenticating inbound traffic
 
 ---
 

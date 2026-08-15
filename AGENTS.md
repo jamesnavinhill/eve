@@ -89,9 +89,13 @@ emphasized, nothing is.
   exact reason.
 - Update `.changelog` at session end with verified work only.
 
-## Testing
+## Standards
 
-See `docs/standards/testing-standards.md` for the full policy. Summary:
+`docs/standards/README.md` maps the project standards. The symlinked
+`technical-writing` skill owns documentation workflow and review; local standards
+add this repository's internal-doc, planning, reporting, and testing policy.
+
+See `docs/standards/testing-standards.md` for the full testing policy. Summary:
 
 - Tests run for system-level critical functions only — the things that must
   never break as we develop.
@@ -110,7 +114,7 @@ eve/                              <- this repo (agent project)
     channels/                     <- HTTP channel with auth
     tools/                        <- custom tools + host-native overrides
                                   (search, image, audio, shell, files, gateway)
-  .agents/skills/                 <- VS Code Copilot skills (symlinked from fork)
+  .agents/skills/                 <- framework symlinks + project-owned Vercel skill snapshots
   .changelog/                     <- session-by-session record
   .github/dependabot.yml          <- weekly npm updates
   docs/                           <- our docs
@@ -140,5 +144,9 @@ pnpm fmt          # oxfmt
 ```
 vercel/eve  --4x daily-->  jamesnavinhill/eve-source-code (GH Actions)
                             --pnpm sync-->  local eve-source-code/
-                                             --symlinks-->  .agents/skills/
+                                             --symlinks-->  eve, technical-writing,
+                                                            gh-pr-description skills
+
+Vercel plugin skills under `.agents/skills/` are project-owned snapshots and do
+not participate in this fork sync chain.
 ```

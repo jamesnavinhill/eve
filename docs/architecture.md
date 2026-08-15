@@ -1,119 +1,113 @@
 # Architecture
 
-Eve is a filesystem-first AI agent built on the [vercel/eve](https://github.com/vercel/eve) framework (v0.37.0). The agent lives in `agent/` — everything is a file that eve compiles and runs.
+Eve is a filesystem-first agent built on `eve@0.37.0`. This repository owns the
+agent definition and project-specific adapters. The sibling `eve-source-code`
+repository owns the framework fork, and the sibling `agency` repository owns the
+Agency Gateway.
 
-## System overview
+## Runtime topology
 
 ```mermaid
 graph TD
-    subgraph Agent Process
-        EVE[eve runtime<br/>Nitro server]
-        AGENT[agent/agent.ts<br/>eve-orchestrator fallback]
-        TOOLS[15 tools<br/>search, messaging, shell, files, media, health]
-        CH[eve.ts channel<br/>HTTP API + auth walk]
-    end
-
-    subgraph Agency Gateway
-        GW[agency_api_gateway.py<br/>:8790 front door]
-        LITELLM[LiteLLM :8787<br/>chat completions]
-        IMG[CF Images :8788<br/>FLUX models]
-        AUDIO[CF Audio :8789<br/>Aura TTS + Whisper STT]
-    end
-
-    subgraph Upstream Providers
-        NEON[Neon AI Gateway<br/>Claude, GPT-5, Gemini]
-        CF[Cloudflare Workers AI<br/>Kimi, Gemma, FLUX, Aura, Whisper]
-    end
-
-    USER[User / TUI / API] --> CH --> EVE
-    EVE --> AGENT --> GW
-    GW --> LITELLM --> NEON
-    LITELLM --> CF
-    GW --> IMG --> CF
-    GW --> AUDIO --> CF
+    USER[User or API client] --> HTTP[eve HTTP channel]
+    HTTP --> RUNTIME[eve durable runtime]
+    RUNTIME --> MODEL[eve-orchestrator]
+    MODEL --> GATEWAY[Agency Gateway]
+    GATEWAY --> PROVIDERS[Cloudflare and other routed model providers]
+    RUNTIME --> TOOLS[15 authored and overridden tools]
+    TOOLS --> SEARCH[Search provider adapters]
+    TOOLS --> MEDIA[Gateway image and audio endpoints]
+    TOOLS --> HOST[Host shell and filesystem]
+    TOOLS --> MESSAGE[Email transport adapters]
+    MESSAGE --> OWNER[Fixed owner SMS or MMS destination]
 ```
 
-## Directory layout
+## Repository ownership
 
-```
-eve/
-├── agent/                  ← the agent definition (eve compiles this)
-│   ├── agent.ts            ← model config, reasoning, limits
-│   ├── instructions.md     ← always-on system prompt (identity + rules)
-│   ├── channels/
-│   │   └── eve.ts          ← HTTP channel with auth walk (vercelOidc + localDev)
-│   ├── lib/
-│   │   ├── gateway.ts             ← shared Agency Gateway provider
-│   │   ├── host-tools.ts          ← host-native shell/file helpers
-│   │   ├── search/                ← shared search contract + four provider adapters
-│   │   └── messaging/             ← outbound contract + SMTP/Resend/AgentMail adapters
-│   └── tools/
-│       ├── whoami.ts              ← returns the signed-in principal
-│       ├── check_proxy_health.ts ← probes all three gateway lanes
-│       ├── generate_image.ts      ← FLUX image generation via Workers AI
-│       ├── text_to_speech.ts      ← Aura TTS via Workers AI
-│       ├── transcribe_audio.ts    ← Whisper STT via Workers AI
-│       ├── bash.ts                ← host-native shell override
-│       ├── read_file.ts           ← host-native file read override
-│       ├── write_file.ts          ← host-native file write override
-│       ├── glob.ts                ← host-native glob override
-│       ├── grep.ts                ← host-native grep override
-│       ├── web_search.ts         ← Tavily web search
-│       ├── exa_search.ts         ← Exa neural search
-│       ├── brave_search.ts       ← Brave web search
-│       ├── firecrawl_search.ts   ← Firecrawl web search
-│       └── send_message.ts       ← fixed-owner outbound SMS/MMS
-│
-├── docs/                  ← our own docs (not the upstream framework docs)
-│   ├── architecture.md     ← this file
-│   ├── config.md           ← env vars, model config, gateway settings
-│   ├── ops.md              ← dev/build/deploy runbook
-│   ├── security.md         ← auth, secrets, trust boundaries
-│   ├── research/           ← research notes and explorations
-│   └── roadmaps/           ← phased roadmap and planning
-│
-├── .agents/skills/        ← skills copied from eve source (reference)
-├── .github/workflows/      ← CI: daily upstream sync
-├── .gitignore              ← ignores .env, .eve/, .output/, node_modules/
-├── .env                    ← gateway credentials (gitignored, never committed)
-├── .env.example            ← template for .env
-├── package.json            ← eve 0.37.0, ai 7, zod 4, @ai-sdk/openai
-├── tsconfig.json           ← TypeScript config for agent/ and evals/
-├── pnpm-lock.yaml          ← pinned dependency tree
-├── pnpm-workspace.yaml     ← build-script approvals
-├── eve.code-workspace      ← VS Code multi-root: eve + agency + eve-source-code
-└── ROADMAP.md              ← high-level roadmap (mirrors docs/roadmaps/)
-```
+| Repository        | Owns                                                                          |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `eve`             | Agent configuration, instructions, channels, tools, adapters, project docs    |
+| `eve-source-code` | Fork of `vercel/eve`, framework source, bundled docs, shared framework skills |
+| `agency`          | Gateway aliases, routing, provider credentials, health probes, operations     |
 
-## The .eve directory
+The installed framework documentation under `node_modules/eve/docs/` matches the
+runtime dependency. Use `eve-source-code` when developing or inspecting the fork,
+not as a runtime dependency of this agent.
 
-`.eve/` is **generated by eve** — it's the compiled output and runtime state. Gitignored. Contains:
+## Agent definition
 
-| Path                   | What                                                 |
-| ---------------------- | ---------------------------------------------------- |
-| `.eve/compile/`        | Compiled agent manifest, module map, diagnostics     |
-| `.eve/discovery/`      | Tool/skill/subagent discovery results                |
-| `.eve/builds/`         | Nitro build artifacts (each build gets a unique dir) |
-| `.eve/logs/`           | Dev session logs (JSONL)                             |
-| `.eve/dev-runtime/`    | Runtime snapshot for dev mode                        |
-| `.eve/.workflow-data/` | Durable session state (survives crashes)             |
+- `agent/agent.ts` selects `gateway.chat("eve-orchestrator")`, declares the 256K
+  context window, enables high reasoning, and sets session limits.
+- `agent/instrumentation.ts` configures PostHog OpenTelemetry and Sentry.
+- `agent/instructions.md` defines Eve's identity and standing behavior.
+- `agent/channels/eve.ts` exposes the durable HTTP session API with the
+  `vercelOidc()` then `localDev()` auth walk.
 
-Never edit `.eve/` by hand. Delete it to force a full recompile.
+`pnpm run info` currently resolves one channel, 15 tools, and no declared
+subagents, schedules, connections, or agent-packaged skills.
 
-## How the agent works
+## Tool architecture
 
-1. **Author** — write files under `agent/` (instructions, tools, channels, connections)
-2. **Compile** — `eve info` validates; `eve build` compiles to Nitro server
-3. **Run** — `eve dev` (TUI) or `eve start` (HTTP server) — sessions are durable
-4. **Sessions** — long-lived conversations that survive process restarts via `.eve/.workflow-data/`
-5. **Compaction** — when context nears the window limit (256K for eve-orchestrator), eve summarizes older turns
+### Host tools
 
-## The model
+`bash`, `read_file`, `write_file`, `glob`, and `grep` override eve's sandbox-backed
+defaults and execute against the local host. Shared implementation lives in
+`agent/lib/host-tools.ts`.
 
-- **Primary:** `eve-orchestrator` via Agency Gateway (LiteLLM fallback group)
-- **Fallback order:** YRKA > JAMI; Kimi K2.7-code > Kimi K2.6 > Gemma 4
-- **Provider:** `@ai-sdk/openai` with `.chat()` to force Chat Completions API
-- **Why `.chat()`:** LiteLLM doesn't support OpenAI's Responses API; `.chat()` sends to `/v1/chat/completions`
-- **Context window:** 256,000 tokens (set via `modelContextWindowTokens` for compaction)
-- **Reasoning:** high effort
-- **Switching models:** change the string in `gateway.chat("model-alias")` — all gateway aliases are available
+### Search
+
+Four model-facing tools remain distinct so Eve can choose a provider deliberately:
+
+- `web_search` — Tavily
+- `exa_search` — Exa
+- `brave_search` — Brave
+- `firecrawl_search` — Firecrawl
+
+Provider HTTP details implement the shared contract under `agent/lib/search/`.
+The common layer owns input/output shape, response validation, cancellation,
+content bounds, and safe errors.
+
+### Gateway media and operations
+
+- `generate_image`
+- `text_to_speech`
+- `transcribe_audio`
+- `check_proxy_health`
+- `whoami`
+
+Gateway configuration and auth headers are centralized in `agent/lib/gateway.ts`.
+The gateway, rather than Eve, owns chat-model fallback order.
+
+### Outbound messaging
+
+`send_message` is a proactive tool, not an inbound channel. It can address only
+the configured owner destinations. The internal seam separates:
+
+- Verizon destination validation (`@vtext.com` and `@vzwpix.com`)
+- SMTP, Resend, and AgentMail email transports
+- attachment loading and operation identifiers
+
+AgentMail accepted test messages but Verizon did not deliver them to the handset.
+Provider acceptance is not delivery verification. A future Resend Chat SDK channel
+would be a separate bidirectional surface with inbound webhooks and thread state.
+
+## Durability and generated state
+
+Eve persists sessions, turns, steps, streams, and waits under `.eve/`. A completed
+step is replayed; an interrupted step can run again, so external side effects need
+idempotency or approval. `.output/` contains the Nitro server build.
+
+Both directories are generated and gitignored. Do not edit them by hand.
+
+## Skills and source synchronization
+
+Three project skill entries are tracked symlinks into `eve-source-code`:
+
+- `eve`
+- `technical-writing`
+- `gh-pr-description`
+
+`pnpm sync` refreshes the clean sibling checkout; the symlinks then expose the
+updated framework-owned content automatically. Vercel plugin skills in
+`.agents/skills/` are project-owned snapshots and do not update through that
+chain.

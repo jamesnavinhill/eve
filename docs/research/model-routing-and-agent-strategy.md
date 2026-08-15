@@ -1,7 +1,7 @@
 # Model Routing & Agent Strategy — Eve Project
 
-**Status:** agency model catalog updated; Eve wiring is the next open slice.  
-**Date:** 2026-08-14.
+**Status:** gateway-owned Eve orchestrator routing shipped; declared subagent strategy remains future work.
+**Date:** 2026-08-15.
 
 ## Canonical sources (owned by agency repo)
 
@@ -11,7 +11,7 @@
 - Human-readable capability docs: `agency/docs/providers/*-model-capabilities.md`
 - Your tiered strategy notes: `agency/_ops/research/model-routing.md`
 
-Eve should consume model metadata from agency through the gateway (`/v1/models`) and the shared `agent/lib/models.ts` catalog; it must not duplicate the upstream source of truth.
+Eve consumes model metadata from agency through the gateway (`/v1/models`); it must not duplicate the upstream source of truth.
 
 ## Agency update completed today
 
@@ -30,17 +30,16 @@ DO gateway needs a restart/redeploy from the latest config before the DO-Agency 
 
 ## Eve implications
 
-1. **Eve (root orchestrator) should use Cloudflare aliases**, not the current `gateway.chat("glm-5-2")` which routes through Neon. Target CF aliases:
-   - `cf-deepseek-ai-deepseek-v4-pro-0813`
-   - `cf-deepseek-ai-deepseek-v4-flash-0731`
-   - `cf-zai-org-glm-5-2`
-   - `cf-moonshotai-kimi-k2-7-code`
-
-2. **Root `agent.ts` must stop hardcoding a single model + context window.** Use `defineDynamic` on `model` so the selected alias and its context window come from the agency catalog, not constants in `agent.ts`.
-
-3. **Subagents use Neon/Nvidia first, CF fallback.** Each declared subagent (`coding`, `audit`, `research`, `creative`, `bounded-task`) imports a shared model-group resolver rather than duplicating lists.
-
-4. **Gateway-level fallback is the eventual upstream fix; Eve tests it first.** LiteLLM `router_settings.fallbacks` will be added later in agency once we know the call-shape behavior. Until then, Eve's `agent/lib/models.ts` returns a deterministic ordered group for each intent.
+1. **Root routing is shipped at the gateway.** Eve calls the static
+   `eve-orchestrator` alias with a 256K context window. LiteLLM owns the ordered
+   Cloudflare fallback group, so Eve pays no per-step resolver cost.
+2. **Model metadata remains agency-owned.** The live gateway catalog and agency
+   configuration own aliases and capabilities; Eve must not duplicate them.
+3. **Declared subagents remain future work.** If specialist agents are added,
+   their role-specific model groups should be owned centrally rather than copied
+   into each definition.
+4. **Dynamic root routing was rejected for the current design.** It added agent
+   complexity without improving the gateway-owned fallback behavior.
 
 ## Eve implementation — done in this session
 

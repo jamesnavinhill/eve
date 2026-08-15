@@ -11,6 +11,11 @@ related:
 install_vercel_plugin: npx plugins add vercel/vercel-plugin
 ---
 
+> Reference snapshot of the Vercel knowledge-base guide identified by
+> `canonical_url` above. Keep it as implementation research, not current project
+> state. Verify package APIs against the installed versions and the canonical guide
+> before implementation.
+
 Email is still where most support requests, notifications, and long-running conversations happen, but agents rarely live there. The [eve Chat SDK channel](https://eve.dev/docs/channels/chat-sdk) bridges your agent to any [Chat SDK](https://chat-sdk.dev/) adapter, and the [Resend adapter](https://resend.com/docs/chat-sdk) turns that bridge into a full email inbox. Users email your agent, eve runs the conversation as a durable session, and replies land back in the same thread as rich HTML emails.
 
 In this guide, you'll add the Chat SDK channel with the Resend adapter to an eve agent, deploy it, and point a Resend inbound webhook at it.

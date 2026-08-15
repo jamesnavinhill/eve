@@ -1,4 +1,9 @@
-# Eve's Current state: what you have
+# Historical framework assessment
+
+> Historical snapshot from before the host tools, search adapters, gateway-owned
+> routing, and outbound messaging work shipped. It does not describe the current
+> agent. Use [`../architecture.md`](../architecture.md) and
+> [`handoff-2026-08-15.md`](handoff-2026-08-15.md) for current state.
 
 Your agent is a **thin but well-wired foundation**. Here's what's actually there:
 

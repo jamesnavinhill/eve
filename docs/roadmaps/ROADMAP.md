@@ -98,16 +98,9 @@ If the process crashes mid-turn, it resumes from the last completed step. No rep
 
 ### Trust boundaries (local-dev posture)
 
-We intentionally run shell and file tools on the **host** instead of the sandbox so the agent shares the developer environment. This is the right trade-off for an internal, trusted agent; production isolation can be reintroduced later if needed.
-
-|                         | App runtime (tools) | Host shell/file tools |
-| ----------------------- | ------------------- | --------------------- |
-| `process.env` / secrets | ✅ Full access      | ✅ Inherits from env  |
-| Your Node.js code       | ✅ Runs directly    | ❌ Not involved       |
-| Network                 | Unrestricted        | Unrestricted          |
-| Filesystem              | App's own           | Host filesystem       |
-
-Tools run in the **app runtime** with full access to `process.env`. The built-in `bash` / file tools are overridden to execute directly on the host machine.
+Shell and file tools intentionally run on the host in local development. See
+[`docs/security.md`](../security.md) for the canonical trust-boundary and
+production-auth requirements.
 
 ### Two ways to delegate to subagents
 
@@ -131,7 +124,7 @@ Tools run in the **app runtime** with full access to `process.env`. The built-in
 
 ### 2. Tools (typed actions)
 
-**Status:** 13 tools. Chat, image, audio, web search, shell, and filesystem covered.
+**Status:** 15 tools. Search, image, audio, messaging, gateway operations, shell, and filesystem are covered.
 
 **Current tools:**
 
@@ -145,6 +138,7 @@ Tools run in the **app runtime** with full access to `process.env`. The built-in
 - `exa_search` — Exa neural search
 - `brave_search` — Brave web search
 - `firecrawl_search` — Firecrawl web search
+- `send_message` — fixed-owner SMS/MMS through the selected email transport
 
 ### 3. Connections (MCP + OpenAPI)
 
