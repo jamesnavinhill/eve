@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "../luna"
+		},
+		{
+			"path": "../eve-source-code"
+		},
+		{
+			"path": "../elements"
+		},
+		{
+			"path": "../agency"
+		},
+		{
+			"path": "../benchmarks"
+		},
+		{
+			"path": "../../orgs/oss/avatar-agent"
+		}
+	],
+	"settings": {}
+}
