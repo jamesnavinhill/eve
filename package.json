@@ -7,7 +7,7 @@
     "dev": "eve dev",
     "build": "eve build",
     "start": "eve start",
-    "info": "eve info",
+    "info": "node --env-file=.env node_modules/eve/bin/eve.js info",
     "sync": "pwsh scripts/sync-fork.ps1",
     "index": "node scripts/index.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",

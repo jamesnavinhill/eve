@@ -141,7 +141,7 @@ function nodeText(src: string, node: { startIndex: number; endIndex: number }): 
   return src.slice(node.startIndex, node.endIndex);
 }
 
-function docstringOf(src: string, bodyNode: { namedChildren: unknown[] } | null | undefined): string | null {
+function docstringOf(_src: string, _bodyNode: { namedChildren: unknown[] } | null | undefined): string | null {
   // TS/TSX have no docstring; we approximate the "first leading comment" via the
   // child comment node directly above a def. The grammar exposes comments as
   // named children of the program, so we leave doc null here. Kept in the row

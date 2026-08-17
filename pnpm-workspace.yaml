@@ -11,4 +11,3 @@ allowBuilds:
   sharp: false
 minimumReleaseAgeExclude:
   - eve@0.38.3
-onlyBuiltDependencies: "@mongodb-js/zstd esbuild node-liblzma"
