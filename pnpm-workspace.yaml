@@ -2,6 +2,13 @@ allowBuilds:
   "@mongodb-js/zstd": true
   esbuild: true
   node-liblzma: true
+  # Native build scripts pulled transitively via @lancedb/lancedb's optional
+  # @huggingface/transformers dep. Luna embeds through the gateway, not local
+  # models — these are not on the runtime path. Set false so pnpm doesn't fail
+  # the install with ERR_PNPM_IGNORED_BUILDS (which aborts pnpm script runs).
+  onnxruntime-node: false
+  protobufjs: false
+  sharp: false
 minimumReleaseAgeExclude:
   - eve@0.38.3
 onlyBuiltDependencies: "@mongodb-js/zstd esbuild node-liblzma"

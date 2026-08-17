@@ -17,5 +17,8 @@ node_modules/
 Thumbs.db
 desktop.ini
 
+# Context-pool artifacts (generated, disposable; regenerable by pnpm index)
+.tmp/
+
 # ZCode session-local plans
 .zcode/
