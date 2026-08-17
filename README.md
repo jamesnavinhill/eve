@@ -53,3 +53,33 @@ GitHub fork. Framework skills linked from that sibling repo update automatically
 - [Project standards](docs/standards/README.md)
 
 See [AGENTS.md](AGENTS.md) for repository workflow and source-of-truth rules.
+
+## Luna Workspace
+
+luna: Canon repo for the Luna project
+C:/Users/james/projects/luna
+<https://github.com/jamesnavinhill/luna>
+<https://luna.navinhill.com/>
+
+eve-source-code: Synced fork of 'Luna's" upstream source code from Vercel
+C:/Users/james/projects/eve-source-code
+<https://github.com/jamesnavinhill/eve-source-code>
+
+agency: Local + Deployed LiteLLM proxy API Gateway
+C:/Users/james/projects/agency
+<https://github.com/studio-jami/agency>
+<https://gateway.jami.studio/v1>
+
+insights: Agency Model Benchmarks & Quota Tracker
+C:/Users/james/projects/insights
+<https://github.com/jamesnavinhill/insights.git>
+<https://insights.jami.studio/>
+
+elements: Prototype UI design shells for Luna
+C:/Users/james/projects/elements
+<https://github.com/jamesnavinhill/elements>
+
+avatar-agent: Live working chat/video avatar project for Luna reference
+C:/Users/james/orgs/oss/avatar-agent
+<https://github.com/studio-jami/avatar-agent>
+<https://avatar.jami.studio/>
