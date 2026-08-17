@@ -24,6 +24,14 @@ that tries CF models in deterministic order (YRKA > JAMI; Kimi K2.7-code >
 Kimi K2.6 > Gemma 4). When model config or gateway behavior changes, verify
 against the live gateway, not just the agency repo's files.
 
+## Code search
+
+You are operating in an environment where ast-grep is installed. For any code
+search that requires understanding of syntax or code structure, default to
+`ast-grep --lang <language> -p '<pattern>'`, adjusting `--lang` for the target
+language. Avoid text-only search tools unless a plain-text search is
+explicitly requested.
+
 ## Source truth
 
 - The live repo, generated artifacts, command output, provider read-backs, and
