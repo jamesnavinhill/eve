@@ -187,8 +187,8 @@ Nvidia also dropped the meta muse glimmer and the nemotron lightning. wire em an
 
 ==========
 
-Valid Entry (optional): ElevenLabs Agent + Video = Always on voice/avatar stream with a continual feed from Eve
-Valid Entry (required): Eve = Orchestrator + Intent Router
+Valid Entry (optional): ElevenLabs Agent + Video = Always on voice/avatar stream with a continual feed from Luna
+Valid Entry (required): Luna = Orchestrator + Intent Router
 Valid Entry (optional): Subagents = 2/3rd level All Purpose, Coding, Audits, Research, Marketing Content
 Valid Entry (optional): Sub-Subagents = 4th level bounded tasks working in well-defined roadmaps with verifiable gates and 1st level Model Audits
 

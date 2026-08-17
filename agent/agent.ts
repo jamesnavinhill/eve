@@ -2,9 +2,9 @@ import { defineAgent } from "eve";
 import { gateway } from "./lib/gateway";
 
 export default defineAgent({
-  // Eve routes through the Agency Gateway's eve-orchestrator alias. The
+  // Luna routes through the Agency Gateway's eve-orchestrator alias. The
   // gateway owns the ordered fallback list (YRKA > JAMI; Kimi K2.7-code >
-  // Kimi K2.6 > Gemma 4) so Eve does not pay a per-step resolver cost.
+  // Kimi K2.6 > Gemma 4) so Luna does not pay a per-step resolver cost.
   // GLM 5.2 is excluded from the orchestrator group so image turns never
   // hit a text-only model.
   model: gateway.chat("eve-orchestrator"),

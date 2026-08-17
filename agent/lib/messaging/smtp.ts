@@ -22,7 +22,7 @@ export const smtpTransport: EmailTransport = {
       subject: message.subject,
       text: message.text,
       attachments: message.attachments,
-      messageId: `<${message.operationId}@eve.local>`,
+      messageId: `<${message.operationId}@luna.local>`,
     });
     return { accepted: true, provider: "smtp", messageId: result.messageId };
   },

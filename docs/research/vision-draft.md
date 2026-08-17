@@ -1,4 +1,4 @@
-\# Vision Outline for Eve Project
+\# Vision Outline for Luna Project
 
 > Updated 2026-08-13 — items marked ✅ are resolved, the rest are open for discussion.
 

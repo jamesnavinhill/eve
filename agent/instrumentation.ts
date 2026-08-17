@@ -15,8 +15,8 @@ import { defineInstrumentation } from "eve/instrumentation";
 //     exporter uses the project token for ingestion)
 //   POSTHOG_HOST — PostHog host (defaults to https://us.i.posthog.com)
 //   SENTRY_DSN — Sentry DSN for error/perf reporting
-//   SENTRY_ENVIRONMENT — environment tag (defaults to "eve-local")
-//   EVE_TRACES_CONTENT — set to "on" to record full inputs/outputs on spans
+//   SENTRY_ENVIRONMENT — environment tag (defaults to "luna-local")
+//   LUNA_TRACES_CONTENT — set to "on" to record full inputs/outputs on spans
 //     (off by default; enable only when the destination is approved)
 export default defineInstrumentation({
   setup: ({ agentName }) => {
@@ -24,7 +24,7 @@ export default defineInstrumentation({
     if (process.env.SENTRY_DSN) {
       Sentry.init({
         dsn: process.env.SENTRY_DSN,
-        environment: process.env.SENTRY_ENVIRONMENT ?? "eve-local",
+        environment: process.env.SENTRY_ENVIRONMENT ?? "luna-local",
         tracesSampleRate: 1.0,
         profilesSampleRate: 1.0,
       });

@@ -1,6 +1,6 @@
 # AGENTS.md — eve agent project
 
-This is the agent project (`jamesnavinhill/eve`), built on the
+This is the agent project (`jamesnavinhill/luna`), built on the
 [eve](https://github.com/vercel/eve) framework. It wires an agent to the Agency
 Gateway (LiteLLM proxy) for chat, images, TTS, and STT. The framework source
 lives in a sibling repo (`eve-source-code/`, a fork of `vercel/eve`).
@@ -19,7 +19,7 @@ project is the source of truth for:
 - PostHog and Sentry project credentials (shared with this agent)
 - API keys and provider credentials
 
-Eve's chat model is the `eve-orchestrator` alias, a LiteLLM fallback group
+Luna's chat model is the `eve-orchestrator` alias, a LiteLLM fallback group
 that tries CF models in deterministic order (YRKA > JAMI; Kimi K2.7-code >
 Kimi K2.6 > Gemma 4). When model config or gateway behavior changes, verify
 against the live gateway, not just the agency repo's files.

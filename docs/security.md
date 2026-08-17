@@ -21,14 +21,20 @@ Authorization: Bearer <AGENCY_GATEWAY_API_KEY>
 
 The eve HTTP channel (`agent/channels/eve.ts`) uses an auth walk:
 
-1. `vercelOidc()` — accepts Vercel-issued OIDC tokens
-2. `localDev()` — accepts everything in local development (synthetic principal)
+1. `vercelOidc()` — accepts current-project Vercel OIDC tokens
+2. `httpBasic()` — accepts the configured owner/operator credential
+3. `localDev()` — accepts everything in local development (synthetic principal)
 
-**Local dev is wide open by design.** This is a personal development environment. Production deployment must replace this with a real authenticator (your app's session/JWT/API key).
+**Local dev is wide open by design.** This is a personal development environment.
+Production direct access requires HTTP Basic or Vercel OIDC. The Resend channel
+verifies its webhook signature separately and admits only configured owner senders.
 
 ## Trust boundaries
 
-We run shell and file tools directly on the **host** instead of inside eve's sandbox. This is a deliberate local-dev posture: the agent shares the developer environment and can run any binary or script you can run. It is the right trade-off for an internal, trusted agent; production deployment may re-enable sandbox isolation if needed.
+Local shell and file tools run directly on the **host** instead of inside eve's
+sandbox. This is a deliberate local-development posture: Luna shares the developer
+environment and can run any binary or script the host account can run. On Vercel,
+the same authored tool names select eve's official Vercel Sandbox implementations.
 
 |                         | App runtime (tools) | Host shell/file tools |
 | ----------------------- | ------------------- | --------------------- |

@@ -1,18 +1,18 @@
-# Eve
+# Luna
 
-Eve is the studio's durable internal agent. This repository defines the agent;
+Luna is the studio's durable internal agent. This repository defines the agent;
 it does not contain the eve framework or the Agency Gateway.
 
-- [`eve`](https://github.com/jamesnavinhill/eve) — this agent project
+- [`luna`](https://github.com/jamesnavinhill/luna) — this agent project
 - [`eve-source-code`](https://github.com/jamesnavinhill/eve-source-code) — sibling fork of `vercel/eve`
 - [`agency`](https://github.com/studio-jami/agency) — sibling Agency Gateway configuration and operations
 
 ## Current state
 
-Eve runs on `eve@0.37.0` and routes chat through the Agency Gateway's
+Luna runs on `eve@0.38.3` and routes chat through the Agency Gateway's
 `eve-orchestrator` alias with a 256K context window. The resolved agent has 15
-tools, one HTTP channel, and no declared subagents, schedules, connections, or
-agent-packaged skills.
+ tools, the eve HTTP and Resend email channels, one daily schedule, and no
+ declared subagents, connections, or agent-packaged skills.
 
 The tool surface covers:
 
@@ -22,10 +22,10 @@ The tool surface covers:
 - gateway health and session identity
 - fixed-owner outbound SMS/MMS through swappable email transports
 
-AgentMail provider acceptance is implemented but did not produce Verizon handset
-delivery. A manual Gmail-to-Verizon test delivered. Resend and a bidirectional
-Chat SDK email channel remain candidate work, pending verified domain and durable
-state configuration.
+Resend sending and receiving are verified for `mail.navinhill.com`. Luna's email
+channel uses the official Resend Chat SDK adapter with durable Chat SDK state in
+Neon Postgres. AgentMail remains only as cutover evidence: provider acceptance did
+not produce Verizon handset delivery.
 
 ## Run and verify
 

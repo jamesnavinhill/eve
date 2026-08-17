@@ -9,7 +9,7 @@ Your agent is a **thin but well-wired foundation**. Here's what's actually there
 
 **The model loop:** `agent.ts` wires GLM-5.2 through the Agency Gateway (LiteLLM proxy), forces Chat Completions API via `.chat()`, sets a 128K context window with `high` reasoning, and generous session limits (7-day timeout, 40M input / 1M output tokens per session). This is solid — the model routing is correct and the compaction trigger is properly configured.
 
-**The identity:** `instructions.md` is a minimal system prompt — "Eve, an internal AI agent for the studio" with a handful of standing rules (be concise, use tools, don't fabricate, read before writing). It's about 15 lines. It sets tone but doesn't give the model any real operational knowledge.
+**The identity:** `instructions.md` is a minimal system prompt — "Luna, an internal AI agent for the studio" with a handful of standing rules (be concise, use tools, don't fabricate, read before writing). It's about 15 lines. It sets tone but doesn't give the model any real operational knowledge.
 
 **The channel:** `eve.ts` is the default eve HTTP channel with an auth walk of `vercelOidc() → localDev()`. This means: Vercel-internal calls pass, local dev passes, everything else gets 401. It's an API surface — `POST /eve/v1/session` to create, `POST /eve/v1/session/:id` to message, `GET /eve/v1/session/:id/stream` to stream. No browser UI, no chat platform, no CORS.
 
@@ -61,11 +61,11 @@ eve is designed as a filesystem-first agent framework where everything is a file
 
 ### Surface layer
 
-| Primitive                            | How it works                                                         | What it gives you                                                                                                                                                   |
-| ------------------------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primitive                            | How it works                                                         | What it gives you                                                                                                                                                     |
+| ------------------------------------ | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Channels** (`agent/channels/*.ts`) | Platform adapters — normalize input to messages, own delivery        | Make the agent reachable from Slack, Discord, Telegram, GitHub PRs, Twilio SMS, Teams, Linear. Also `useEveAgent` React hook or `withEve` Next.js for a browser UI. |
-| **Instructions** (`instructions.md`) | System or user role, static or dynamic                               | Can be dynamic per-tenant, per-channel. Can compose from a directory. The identity + standing rules.                                                                |
-| **Dynamic capabilities**             | `defineDynamic` — resolve model/tools/skills/instructions at runtime | Per-tenant tool sets, feature flags, dynamic model routing (images → vision model, text → GLM-5.2).                                                                 |
+| **Instructions** (`instructions.md`) | System or user role, static or dynamic                               | Can be dynamic per-tenant, per-channel. Can compose from a directory. The identity + standing rules.                                                                  |
+| **Dynamic capabilities**             | `defineDynamic` — resolve model/tools/skills/instructions at runtime | Per-tenant tool sets, feature flags, dynamic model routing (images → vision model, text → GLM-5.2).                                                                   |
 
 ### Quality + packaging layer
 
@@ -149,7 +149,7 @@ export default defineAgent({
 });
 ```
 
-Events: `session.started` (once), `turn.started` (per turn), `step.started` (every model call). Precedence: step > turn > session. You can return different models per turn, per caller, per input type. The selection object carries `{ model, modelContextWindowTokens?, modelOptions? }`.
+Lunants: `session.started` (once), `turn.started` (per turn), `step.started` (every model call). Precedence: step > turn > session. You can return different models per turn, per caller, per input type. The selection object carries `{ model, modelContextWindowTokens?, modelOptions? }`.
 
 **Option B — Gateway model IDs (strings):**
 If you used a string like `"anthropic/claude-sonnet-5"`, eve resolves the context window automatically from the Vercel AI Gateway catalog. But your LiteLLM proxy isn't in the Vercel AI Gateway catalog — those are your custom aliases. So string IDs won't work for your gateway models unless they happen to match a catalog entry.

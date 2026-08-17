@@ -1,9 +1,13 @@
-import { defineTool } from "eve/tools";
+import { defineBashTool, defineTool } from "eve/tools";
 import { bashInputSchema, bashOutputSchema, executeBash } from "../lib/host-tools";
 
-export default defineTool({
-  description: "Execute a shell command in the shared workspace environment.",
-  inputSchema: bashInputSchema,
-  outputSchema: bashOutputSchema,
-  execute: executeBash,
-});
+const description = "Execute a shell command in the shared workspace environment.";
+
+export default process.env.VERCEL === "1"
+  ? defineBashTool({ description })
+  : defineTool({
+      description,
+      inputSchema: bashInputSchema,
+      outputSchema: bashOutputSchema,
+      execute: executeBash,
+    });

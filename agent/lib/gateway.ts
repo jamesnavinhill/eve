@@ -22,7 +22,7 @@ export function isGatewayConfigured(): boolean {
 }
 
 // Shared OpenAI-compatible provider for the model loop.
-// A fetch wrapper injects eve's surface identity into every chat completion
+// A fetch wrapper injects Luna's surface identity into every chat completion
 // request body. The gateway's enrichment hook reads user + metadata.tags
 // and forwards them into PostHog / Langfuse traces, giving us per-surface
 // attribution with a single gateway key.
@@ -33,10 +33,10 @@ export const gateway = createOpenAI({
     if (init?.body && typeof init.body === "string") {
       try {
         const body = JSON.parse(init.body) as Record<string, unknown>;
-        body.user = body.user ?? "eve";
+        body.user = body.user ?? "luna";
         const meta = (body.metadata ?? {}) as Record<string, unknown>;
         const tags = Array.isArray(meta.tags) ? meta.tags : [];
-        if (!tags.includes("surface:eve")) tags.push("surface:eve");
+        if (!tags.includes("surface:luna")) tags.push("surface:luna");
         meta.tags = tags;
         body.metadata = meta;
         init.body = JSON.stringify(body);

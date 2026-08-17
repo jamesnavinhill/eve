@@ -70,7 +70,7 @@ You speak → ElevenLabs Agent (STT + turn-taking + TTS + avatar)
         → speaks the summary on its next turn (not blurting)
 ```
 
-The KEY insight: **ElevenLabs IS the conversational shell. Eve is the worker backend.** The ElevenLabs agent doesn't need to be the eve agent — it calls the eve agent as a tool (webhook tool or client tool that HTTP POSTs to your eve endpoint). Your eve agent becomes the "brain" that routes to subagents, runs tools, executes in sandboxes, and returns structured results.
+The KEY insight: **ElevenLabs IS the conversational shell. Luna is the worker backend.** The ElevenLabs agent doesn't need to be the eve agent — it calls the eve agent as a tool (webhook tool or client tool that HTTP POSTs to your eve endpoint). Your eve agent becomes the "brain" that routes to subagents, runs tools, executes in sandboxes, and returns structured results.
 
 This matches the industry pattern. OpenAI's Realtime API supports `function` tools where the client executes the logic and returns results. Google's Gemini Live supports `functionCall`/`functionResponse` over WebSocket. ElevenLabs does the same thing. The real-time model handles conversation + turn-taking + audio, and delegates the "thinking" work to external tools. Your eve agent IS that external tool.
 
@@ -82,7 +82,7 @@ This matches the industry pattern. OpenAI's Realtime API supports `function` too
 - Vercel Sandbox (microVM for sandbox)
 - Vercel Cron (schedules)
 
-**But "always-on" doesn't mean "always running."** Eve is event-driven. A turn runs when a message arrives, then parks. No compute held while waiting. Sessions can persist for 7 days (your current config) with zero idle compute cost. The workflow durably parks between turns.
+**But "always-on" doesn't mean "always running."** Luna is event-driven. A turn runs when a message arrives, then parks. No compute held while waiting. Sessions can persist for 7 days (your current config) with zero idle compute cost. The workflow durably parks between turns.
 
 **Your other credits:**
 
@@ -153,7 +153,7 @@ graph TD
 
     YOU <-->|WebSocket| EL
 
-    EL -->|webhook tool: POST /eve/v1/session| EVE[Eve Agent<br/>HTTP API + auth]
+    EL -->|webhook tool: POST /eve/v1/session| EVE[Luna Agent<br/>HTTP API + auth]
     EL -->|contextual_update: progress/results| EL
 
     EVE -->|defineDynamic: route by intent| SA1[Subagent: Researcher<br/>web_search + sandbox]
@@ -178,7 +178,7 @@ The flow:
 
 1. You speak to ElevenLabs → STT + intent routing
 2. If it needs work → ElevenLabs calls eve via webhook tool (HTTP POST)
-3. Eve routes to subagents based on the intent
+3. Luna routes to subagents based on the intent
 4. Subagents execute (tools, sandbox, connections, nested subagents)
 5. Results flow back to eve → back to ElevenLabs
 6. ElevenLabs receives `contextual_update` with results → speaks summary on next turn

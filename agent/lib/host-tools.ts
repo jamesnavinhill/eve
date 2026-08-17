@@ -8,7 +8,7 @@ import { basename, normalize, relative, resolve as resolvePath } from "node:path
 import { z } from "zod";
 
 /**
- * Host-native implementations for Eve's built-in file/shell tools.
+ * Host-native implementations for Luna's built-in file/shell tools.
  *
  * These replace the sandbox-backed defaults so the agent operates directly on
  * the developer machine / deployment host. Paths are resolved against the
@@ -464,6 +464,6 @@ export async function executeGrep(input: GrepInput): Promise<GrepOutput> {
 }
 
 // Helper used by shell tools that need a temporary workspace directory on the host.
-export function createTempDirectory(prefix = "eve-host-"): string {
+export function createTempDirectory(prefix = "luna-host-"): string {
   return resolvePath(tmpdir(), `${prefix}${randomUUID()}`);
 }

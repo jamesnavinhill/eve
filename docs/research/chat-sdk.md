@@ -8,7 +8,7 @@ description: Bridge any Vercel Chat SDK adapter — Slack, Discord, Telegram, Wh
 > Reference snapshot of the upstream eve Chat SDK channel documentation, kept
 > nearby for upcoming communication work. The installed runtime documentation at
 > `node_modules/eve/docs/channels/chat-sdk.mdx` is authoritative for this project.
-> This file does not describe a channel currently configured in Eve. Relative
+> This file does not describe a channel currently configured in Luna. Relative
 > links below assume the upstream eve documentation layout and may not resolve in
 > this project repository.
 
@@ -72,7 +72,7 @@ eve deploy
 
 ## Configure the webhook route
 
-Each adapter mounts one `POST` route at `/eve/v1/{adapterName}`, so the `resend` adapter above is served at `/eve/v1/resend`. Point your provider's webhook (the Resend inbound address, the Slack Event Subscriptions URL, etc.) at that path.
+Each adapter mounts one `POST` route at `/eve/v1/{adapterName}`, so the `resend` adapter above is served at `/eve/v1/resend`. Point your provider's webhook (the Resend inbound address, the Slack Lunant Subscriptions URL, etc.) at that path.
 
 Override the base path for every adapter with `route`, or pin an individual adapter's path with `routes`:
 

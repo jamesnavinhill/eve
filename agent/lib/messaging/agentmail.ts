@@ -18,7 +18,7 @@ export const agentMailTransport: EmailTransport = {
         to: [message.to],
         subject: message.subject,
         text: message.text,
-        headers: { "X-Eve-Operation-Id": message.operationId },
+        headers: { "X-Luna-Operation-Id": message.operationId },
         attachments: message.attachments.map((attachment) => ({
           filename: attachment.filename,
           content_type: attachment.contentType,

@@ -13,7 +13,8 @@ pnpm fmt
 ```
 
 `pnpm run info` is the authoritative local read-back for the resolved agent. The
-current expected result is one channel, 15 tools, and zero diagnostics.
+current expected result is two channels, 15 tools, one schedule, and zero
+diagnostics.
 
 Use `pnpm exec eve invoke "<instruction>"` for a focused end-to-end runtime check.
 It starts a local server, creates a durable session, streams the result, and stops
@@ -26,7 +27,7 @@ provider claims with authenticated read-back:
 
 - Agency Gateway: health endpoints, model catalog, and a focused completion when
   inference is required.
-- Search: invoke each model-facing search tool through Eve.
+- Search: invoke each model-facing search tool through Luna.
 - Messaging: inspect provider message records and delivery events. A provider's
   `accepted` or `sent` state does not prove handset or inbox receipt.
 
@@ -73,10 +74,10 @@ workflow.
 
 ## Deployment
 
-The production deployment target is not yet selected. Vercel aligns with eve's
-managed runtime, Workflow, deployment, and OIDC surfaces. Self-hosting keeps the
-agent near the Agency Gateway but requires process supervision, TLS, durable
-storage, and webhook operations.
+Production is the personal `jameshill/luna` Vercel project, connected to
+`jamesnavinhill/luna` and served at `luna.navinhill.com`. Vercel owns the web
+runtime, Workflow, Cron, OIDC, and Vercel Sandbox integration. Neon is linked
+through Vercel Marketplace and provides the Chat SDK state database.
 
-Choose a target as part of the first feature that requires a public callback or
-always-on execution, such as a bidirectional email channel or Google OAuth.
+Resend posts `email.received` events to `/eve/v1/resend`. The daily health schedule
+compiles to Vercel Cron at 14:00 UTC.

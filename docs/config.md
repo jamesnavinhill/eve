@@ -20,18 +20,24 @@ Copy `.env.example` → `.env` and fill in:
 | `SMTP_USER`               | No       | SMTP authentication username                                           |
 | `SMTP_PASSWORD`           | No       | SMTP authentication password                                           |
 | `SMTP_FROM_EMAIL`         | No       | Valid sender address for SMTP messages                                 |
-| `RESEND_API_KEY`          | No       | Resend transport API key                                               |
-| `RESEND_FROM_EMAIL`       | No       | Sender on a verified Resend domain                                     |
+| `RESEND_API_KEY`          | Yes      | Resend channel and transport API key                                   |
+| `RESEND_WEBHOOK_SECRET`   | Yes      | Signing secret for the Resend `email.received` webhook                 |
+| `RESEND_FROM_EMAIL`       | Yes      | Luna sender on the verified Resend domain                              |
+| `LUNA_OWNER_EMAIL`        | Yes      | Proactive email and schedule recipient                                 |
+| `LUNA_OWNER_EMAILS`       | Yes      | Comma-separated inbound sender allow-list                              |
+| `DATABASE_URL`            | Yes      | Neon Postgres URL used by Chat SDK state                               |
+| `LUNA_HTTP_USERNAME`      | No       | Production HTTP Basic username; defaults to `luna`                     |
+| `LUNA_HTTP_PASSWORD`      | Yes      | Production HTTP Basic password                                         |
 | `AGENTMAIL_API_KEY`       | No       | AgentMail transport API key                                            |
 | `AGENTMAIL_EMAIL_ADDRESS` | No       | AgentMail inbox used as the sender                                     |
 | `POSTHOG_PROJECT_TOKEN`   | Yes      | PostHog project token for OTel trace ingestion                         |
 | `POSTHOG_HOST`            | No       | PostHog host (defaults to `https://us.i.posthog.com`)                  |
 | `SENTRY_DSN`              | No       | Sentry DSN for error tracking and performance tracing                  |
-| `SENTRY_ENVIRONMENT`      | No       | Environment tag (defaults to `eve-local`)                              |
+| `SENTRY_ENVIRONMENT`      | No       | Environment tag (defaults to `luna-local`)                             |
 
 ## Outbound messaging
 
-`send_message` is a proactive outbound tool, not an inbound channel. Eve sees one
+`send_message` is a proactive outbound tool, not an inbound channel. Luna sees one
 provider-neutral action. `OUTBOUND_EMAIL_PROVIDER` explicitly selects the email
 transport; there is no fallback chain.
 
@@ -44,16 +50,16 @@ in `.env` and are never provided by the model, so the initial tool cannot messag
 arbitrary recipients.
 
 SMTP, Resend, and AgentMail implement the same transport contract. Resend uses
-Eve's tool-call-derived idempotency key. SMTP uses a deterministic Message-ID.
+Luna's tool-call-derived idempotency key. SMTP uses a deterministic Message-ID.
 AgentMail receives the operation ID as a message header, but its API does not
 document provider-side idempotency, so an interruption during send can still
 create a duplicate.
 
 As of August 15, 2026, AgentMail accepted outbound messages but Verizon did not
 deliver them. A manual Gmail send to the same address arrived immediately. The
-Resend domain `mail.navinhill.com` exists with sending and receiving enabled but
-remains pending verification. A bidirectional Resend Chat SDK channel is research,
-not shipped configuration.
+Resend domain `mail.navinhill.com` is verified with sending and receiving enabled.
+The bidirectional channel uses the official Resend Chat SDK adapter and durable
+Postgres state.
 
 ## Model configuration (`agent/agent.ts`)
 
@@ -79,7 +85,7 @@ export default defineAgent({
 
 Change the string in `gateway.chat("model-alias")`. The Agency Gateway owns the
 live alias catalog and routing in `agency/config/litellm/config.yaml`; query the
-live `/v1/models` endpoint before selecting another alias. Eve's default is
+live `/v1/models` endpoint before selecting another alias. Luna's default is
 `eve-orchestrator`, a gateway-owned fallback group with a 256K context window.
 
 ### Why `.chat()` not bare `gateway()`
@@ -111,24 +117,27 @@ Source: `agency/scripts/agency_api_gateway.py`
 
 ## Channel auth (`agent/channels/eve.ts`)
 
-The auth walk is `[vercelOidc(), localDev()]`:
+The auth walk accepts:
 
-- `vercelOidc()` — accepts Vercel-issued OIDC tokens (for Vercel-to-Vercel calls)
-- `localDev()` — accepts everything in development (synthetic local principal)
+- `vercelOidc()` for Vercel-issued internal runtime calls;
+- `httpBasic()` when `LUNA_HTTP_PASSWORD` is configured for direct owner access;
+- `localDev()` for deliberately open local development.
 
-In production (non-Vercel), replace with your own authenticator. See [eve auth docs](../eve-source-code/docs/guides/auth-and-route-protection.md).
+The Resend route has a separate boundary: the adapter verifies the webhook signing
+secret, then Luna's handler admits only senders listed in `LUNA_OWNER_EMAILS`.
 
 ## pnpm configuration (`pnpm-workspace.yaml`)
 
 ```yaml
 allowBuilds:
   "@mongodb-js/zstd": true
+  esbuild: true
   node-liblzma: true
 ```
 
-These transitive native dependencies support eve's sandbox backend. The project
-allows both build scripts even though its authored shell and file tools currently
-run on the host.
+The compression dependencies support eve's sandbox backend. `esbuild` is required
+by the installed workflow toolchain. Local shell and file tools run on the host;
+their Vercel branch uses the official sandbox implementations.
 
 ## TypeScript (`tsconfig.json`)
 

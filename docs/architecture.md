@@ -1,6 +1,6 @@
 # Architecture
 
-Eve is a filesystem-first agent built on `eve@0.37.0`. This repository owns the
+Luna is a filesystem-first agent built on `eve@0.38.3`. This repository owns the
 agent definition and project-specific adapters. The sibling `eve-source-code`
 repository owns the framework fork, and the sibling `agency` repository owns the
 Agency Gateway.
@@ -26,7 +26,7 @@ graph TD
 
 | Repository        | Owns                                                                          |
 | ----------------- | ----------------------------------------------------------------------------- |
-| `eve`             | Agent configuration, instructions, channels, tools, adapters, project docs    |
+| `luna`            | Agent configuration, instructions, channels, tools, adapters, project docs    |
 | `eve-source-code` | Fork of `vercel/eve`, framework source, bundled docs, shared framework skills |
 | `agency`          | Gateway aliases, routing, provider credentials, health probes, operations     |
 
@@ -39,24 +39,27 @@ not as a runtime dependency of this agent.
 - `agent/agent.ts` selects `gateway.chat("eve-orchestrator")`, declares the 256K
   context window, enables high reasoning, and sets session limits.
 - `agent/instrumentation.ts` configures PostHog OpenTelemetry and Sentry.
-- `agent/instructions.md` defines Eve's identity and standing behavior.
-- `agent/channels/eve.ts` exposes the durable HTTP session API with the
-  `vercelOidc()` then `localDev()` auth walk.
+- `agent/instructions.md` defines Luna's identity and standing behavior.
+- `agent/channels/eve.ts` exposes the durable HTTP session API through Vercel
+  OIDC, production HTTP Basic, and deliberately open local development auth.
+- `agent/channels/resend.ts` maps owner email to durable sessions through the
+  official Resend Chat SDK adapter and Neon-backed Chat SDK state.
 
-`pnpm run info` currently resolves one channel, 15 tools, and no declared
-subagents, schedules, connections, or agent-packaged skills.
+`pnpm run info` resolves two channels, 15 tools, one schedule, and no declared
+subagents, connections, or agent-packaged skills.
 
 ## Tool architecture
 
 ### Host tools
 
-`bash`, `read_file`, `write_file`, `glob`, and `grep` override eve's sandbox-backed
-defaults and execute against the local host. Shared implementation lives in
-`agent/lib/host-tools.ts`.
+`bash`, `read_file`, `write_file`, `glob`, and `grep` execute directly against the
+host during local development. The same authored tool names select eve's official
+sandbox implementations on Vercel, where `defaultBackend()` selects Vercel
+Sandbox. Shared local implementation lives in `agent/lib/host-tools.ts`.
 
 ### Search
 
-Four model-facing tools remain distinct so Eve can choose a provider deliberately:
+Four model-facing tools remain distinct so Luna can choose a provider deliberately:
 
 - `web_search` — Tavily
 - `exa_search` — Exa
@@ -76,7 +79,7 @@ content bounds, and safe errors.
 - `whoami`
 
 Gateway configuration and auth headers are centralized in `agent/lib/gateway.ts`.
-The gateway, rather than Eve, owns chat-model fallback order.
+The gateway, rather than Luna, owns chat-model fallback order.
 
 ### Outbound messaging
 
@@ -88,12 +91,22 @@ the configured owner destinations. The internal seam separates:
 - attachment loading and operation identifiers
 
 AgentMail accepted test messages but Verizon did not deliver them to the handset.
-Provider acceptance is not delivery verification. A future Resend Chat SDK channel
-would be a separate bidirectional surface with inbound webhooks and thread state.
+Provider acceptance is not delivery verification. The Resend channel is the
+bidirectional communication surface; the older transport selector remains only
+until live cutover tests decide whether any path still earns its keep.
+
+## State ownership
+
+- eve and Vercel Workflow own sessions, turns, steps, streams, waits, and replay.
+- `defineState` owns conversation-scoped working state.
+- Chat SDK's `chat_state_*` Neon tables own subscriptions, locks, deduplication,
+  queues, and adapter cache.
+- Future Luna-owned Neon tables will own independently queryable global and project
+  memory. They must not reuse Chat SDK's tables.
 
 ## Durability and generated state
 
-Eve persists sessions, turns, steps, streams, and waits under `.eve/`. A completed
+Luna persists sessions, turns, steps, streams, and waits under `.eve/`. A completed
 step is replayed; an interrupted step can run again, so external side effects need
 idempotency or approval. `.output/` contains the Nitro server build.
 

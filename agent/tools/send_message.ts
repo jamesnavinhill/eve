@@ -25,7 +25,7 @@ const outputSchema = z.strictObject({
 
 export default defineTool({
   description: [
-    "Send an outbound SMS or image MMS to Eve's owner through the configured email transport and Verizon destination.",
+    "Send an outbound SMS or image MMS to Luna's owner through the configured email transport and Verizon destination.",
     "Use only when the owner requests a message or an owner-authorized workflow requires one.",
     "This tool cannot message arbitrary recipients. Never use it for bulk messaging.",
   ].join("\n"),
@@ -40,7 +40,7 @@ export default defineTool({
     }
     const attachments = await loadImageAttachments(attachmentPaths);
     const to = verizonDestination(delivery);
-    const effectiveSubject = subject ?? (delivery === "sms" ? "Eve" : "Eve MMS");
+    const effectiveSubject = subject ?? (delivery === "sms" ? "Luna" : "Luna MMS");
     const emailToTextLength = to.length + effectiveSubject.length + message.length;
     if (delivery === "sms" && emailToTextLength > 160) {
       throw new Error(

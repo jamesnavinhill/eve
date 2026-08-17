@@ -1,7 +1,7 @@
-# Eve — Studio Internal Agent Roadmap
+# Luna — Studio Internal Agent Roadmap
 
 > Status: **Phase 0 — Foundation scaffolded** (2026-08-13)
-> Repo: `jamesnavinhill/eve` (this project) | Fork: `jamesnavinhill/eve-source-code` (sibling, fork of `vercel/eve`) | Source: `vercel/eve` v0.37.0
+> Repo: `jamesnavinhill/luna` (this project) | Fork: `jamesnavinhill/eve-source-code` (sibling, fork of `vercel/eve`) | Source: `vercel/eve` v0.37.0
 
 ---
 
@@ -17,7 +17,7 @@ eve/                          ← your agent project (this repo)
 ├── .gitignore                ← ignores node_modules/, .env, build artifacts
 ├── agent/
 │   ├── agent.ts              ← model config (eve-orchestrator fallback alias)
-│   ├── instructions.md       ← Eve identity + standing rules
+│   ├── instructions.md       ← Luna identity + standing rules
 │   ├── channels/
 │   │   └── eve.ts            ← HTTP channel with auth walk (vercelOidc + localDev)
 │   ├── lib/
@@ -154,22 +154,22 @@ production-auth requirements.
 
 ### 4. Channels (entry points)
 
-**Status:** Eve HTTP channel (default API). Ready for CLI/curl/frontend.
+**Status:** Luna HTTP channel (default API). Ready for CLI/curl/frontend.
 
 **Available channels:**
 
-| Channel                | Use                                                  |
-| ---------------------- | ---------------------------------------------------- |
+| Channel                | Use                                                   |
+| ---------------------- | ----------------------------------------------------- |
 | **eve HTTP** (current) | API, TUI, `curl`, browser frontend via `useEveAgent` |
-| **Slack**              | Mention-driven agent in Slack channels               |
-| **Discord**            | Slash command / component agent                      |
-| **Telegram**           | Bot messages                                         |
-| **GitHub**             | @mentions in issues/PRs, code review                 |
-| **Linear**             | Issue delegation, Agent Sessions                     |
-| **Teams**              | Messages + Adaptive Cards                            |
-| **Twilio**             | SMS / voice-transcribed calls                        |
-| **iMessage** (Photon)  | Blue-bubble agent                                    |
-| **Custom**             | `defineChannel` for any webhook/WebSocket            |
+| **Slack**              | Mention-driven agent in Slack channels                |
+| **Discord**            | Slash command / component agent                       |
+| **Telegram**           | Bot messages                                          |
+| **GitHub**             | @mentions in issues/PRs, code review                  |
+| **Linear**             | Issue delegation, Agent Sessions                      |
+| **Teams**              | Messages + Adaptive Cards                             |
+| **Twilio**             | SMS / voice-transcribed calls                         |
+| **iMessage** (Photon)  | Blue-bubble agent                                     |
+| **Custom**             | `defineChannel` for any webhook/WebSocket             |
 
 ### 5. Subagents (specialists)
 
@@ -254,7 +254,7 @@ production-auth requirements.
 
 - [x] Scaffold eve agent project
 - [x] Model config — Agency Gateway (LiteLLM, OpenAI Chat Completions)
-- [x] Eve HTTP channel with auth walk
+- [x] Luna HTTP channel with auth walk
 - [x] Starter tools (whoami, gateway health check)
 - [x] Skills symlinked from eve-source-code into `.agents/skills/`
 - [x] Model credential in `.env` (gateway master key)
@@ -278,28 +278,30 @@ production-auth requirements.
 - [x] Durable sessions verified through reconnectable streams
 - [x] Host filesystem access works without Docker sandbox
 
-### Phase 2: Voice & avatar integration (next)
+### Phase 2: Production communication foundation (in progress)
+
+- [x] Select personal Vercel deployment with managed Workflow, Cron, and Sandbox
+- [x] Link Neon Postgres for durable Chat SDK state
+- [x] Add the official Resend Chat SDK email channel
+- [x] Add production HTTP Basic auth while preserving open local development
+- [x] Add a daily operational health schedule
+- [ ] Verify inbound email, threaded replies, deduplication, proactive delivery, and attachments live
+- [ ] Add system-critical evals for the verified communication contract
+
+### Phase 3: Memory & delegation
+
+- [ ] Define the first concrete `defineState` working-memory slot
+- [ ] Design Luna-owned Neon schemas for global and project memory
+- [ ] Add the first declared subagent for an observed workflow
+- [ ] Add dynamic schedules when a user-created scheduling workflow requires them
+
+### Phase 4: Voice & avatar integration
 
 - [ ] Decide where `text_to_speech` / `transcribe_audio` belong: root agent, subagent, or removed in favor of ElevenLabs
-- [ ] Evaluate: ElevenLabs + Anam as a channel, remote agent, or top-layer orchestrator
-- [ ] Reference: `c:\Users\james\orgs\oss\avatar-agent` (dormant but working)
-- [ ] Reference: `c:\Users\james\projects\gardens` (multi-provider ElevenLabs/Anam)
-- [ ] Design: voice/video as uninterrupted top-layer, Eve executes background tasks via HTTP sessions
-- [ ] Agnostic seams: no vendor lock-in (multiple providers, multiple accounts)
-
-### Phase 3: Channels & delegation
-
-- [ ] Choose first non-HTTP channel (Slack? Discord? Telegram? GitHub?)
-- [ ] Add first declared subagent (researcher? coder?)
-- [ ] Add a schedule (daily digest or heartbeat)
-- [ ] Add `defineState` for session memory
-
-### Phase 4: Production deployment
-
-- [ ] Choose: Vercel (managed Workflow + Sandbox + Cron) or self-host (Node + Docker)
-- [ ] Replace `localDev` with real route auth
-- [ ] Harden or re-enable sandbox isolation if needed
-- [ ] Set up evals for agent behavior
+- [ ] Evaluate ElevenLabs + Anam as a channel, remote agent, or top-layer orchestrator
+- [ ] Reference: `c:\Users\james\orgs\oss\avatar-agent` and `c:\Users\james\projects\gardens`
+- [ ] Design voice/video as an uninterrupted top layer while Luna executes background tasks
+- [ ] Preserve provider-agnostic seams across multiple providers and accounts
 
 ---
 
@@ -308,9 +310,9 @@ production-auth requirements.
 1. ~~**Proxy API format**~~ ✅ OpenAI-compatible (LiteLLM Chat Completions). Resolved.
 2. ~~**Model/routing**~~ ✅ `eve-orchestrator` gateway alias with ordered CF fallback. Resolved.
 3. ~~**Sandbox for local dev**~~ ✅ Host-native shell/file overrides. Resolved.
-4. **Voice integration approach** — channel? remote agent? top-layer orchestrator? (needs ElevenLabs + EVE official docs review together)
-5. **Deployment target** — Vercel (managed) or self-host? (affects Workflow/Sandbox/Cron)
-6. **First channel beyond HTTP** — GitHub? Slack/Discord/Telegram?
+4. ~~**Deployment target**~~ ✅ Personal Vercel project with managed Workflow, Cron, and Sandbox. Resolved.
+5. ~~**First channel beyond HTTP**~~ ✅ Resend email through the official Chat SDK bridge. Resolved.
+6. **Voice integration approach** — channel, remote agent, or top-layer orchestrator?
 
 ---
 
