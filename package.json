@@ -37,7 +37,7 @@
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@types/nodemailer": "^8.0.1",
-    "just-bash": "^3.2.0",
+    "just-bash": "^3.3.0",
     "oxfmt": "^0.63.0",
     "oxlint": "^1.78.0",
     "oxlint-config": "^1.0.0",
